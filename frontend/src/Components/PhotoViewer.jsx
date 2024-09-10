@@ -4,9 +4,20 @@ import "../Styles/PhotoViewer.css";
 
 function PhotoViewer() {
     const [time, setTime] = useState(0);
+    const [successTime, setSuccessTime] = useState(0);
+    const [gameHasStarted, setGameHasStarted] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const [isTagging, setIsTagging] = useState(false);
+    const [playerWon, setPlayerWon] = useState(false);
+    const [playerLost, setPlayerLost] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
+
+    const target = [
+        { x: 151, y: 171 },
+        { x: 149, y: 278 },
+        { x: 276, y: 231 },
+        { x: 279, y: 312 },
+    ];
 
     useEffect(() => {
         let interval;
@@ -15,16 +26,21 @@ function PhotoViewer() {
         return () => clearInterval(interval);
     }, [isRunning]);
 
-    function formattedTime() {
+    function formattedTime(time) {
         const totalSeconds = time / 10;
-        const displayMinutes = Math.floor(totalSeconds / 60);
-        const displaySeconds = (totalSeconds % 60).toFixed(1);
-        const displayTime = `${displayMinutes.toString().padStart(2, "0")}:
-            ${displaySeconds.toString().padStart(4, "0")}`;
+
+        const minutes = Math.floor(totalSeconds / 60);
+        const displayMinutes = `${minutes.toString().padStart(2, "0")}`;
+
+        const seconds = (totalSeconds % 60).toFixed(1);
+        const displaySeconds = `${seconds.toString().padStart(4, "0")}`;
+
+        const displayTime = `${displayMinutes}:${displaySeconds}`;
         return displayTime;
     }
 
     function startGame() {
+        setGameHasStarted(true)
         setIsRunning(true);
     }
 
@@ -41,17 +57,45 @@ function PhotoViewer() {
         toggleTagging();
     }
 
+    function checkTagIsCorrect() {
+        let isInside = false;
+        const numEdges = target.length;
+        for (let i = 0, j = numEdges - 1; i < numEdges; j = i, i++) {
+            const yIsBounded = tag.y < target[i].y !== tag.y < target[j].y;
+            const xIsBounded =
+                tag.x <
+                target[i].x +
+                    ((tag.y - target[i].y) / (target[j].y - target[i].y)) *
+                        (target[j].x - target[i].x);
+            console.log(`tag: ${tag.x}, ${tag.y}`, ``)
+            console.log('edge', `c1:(${target[i].x}, ${target[i].y}) - c2:(${target[j].x}, ${target[j].y})`)
+            console.log(`y is Bounded: ${yIsBounded}`)
+            console.log(`x intercepts: ${xIsBounded}`)
+            const castIntersects = yIsBounded && xIsBounded;
+            if (castIntersects) isInside = !isInside;
+        }
+        return isInside;
+    }
+
     function handleTagSubmission(e) {
         e.preventDefault();
         console.log("tag submitted");
-        setIsRunning(false);
-        setTime(0);
+        if (checkTagIsCorrect()) {
+            setSuccessTime(time);
+            setIsRunning(false)
+            setPlayerWon(true);
+            setPlayerLost(false);
+            toggleTagging();
+            return;
+        }
+        setPlayerLost(true);
         toggleTagging();
+        return;
     }
 
     return (
         <div style={{ position: "relative" }}>
-            {!isRunning ? (
+            {!gameHasStarted ? (
                 <button type="button" onClick={startGame}>
                     start game
                 </button>
@@ -63,8 +107,18 @@ function PhotoViewer() {
                         alt="Intersection"
                         onClick={tagTarget}
                     />
-                    <div>{formattedTime()}</div>
-
+                    <div>{formattedTime(time)}</div>
+                    {playerWon && (
+                        <div>
+                            you got it right in {formattedTime(successTime)}!
+                        </div>
+                    )}
+                    {playerLost && (
+                        <div>
+                            sorry, you got it wrong, but keep going, time is
+                            ticking!
+                        </div>
+                    )}
                     {isTagging && (
                         <form
                             onSubmit={handleTagSubmission}
