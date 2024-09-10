@@ -12,11 +12,19 @@ function PhotoViewer() {
     const [playerLost, setPlayerLost] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
 
-    const target = [
-        { x: 151, y: 171 },
-        { x: 149, y: 278 },
-        { x: 276, y: 231 },
-        { x: 279, y: 312 },
+    const targets = [
+        [
+            { x: 151, y: 171 },
+            { x: 149, y: 278 },
+            { x: 276, y: 231 },
+            { x: 279, y: 312 },
+        ],
+        [
+            { x: 306, y: 231 },
+            { x: 328, y: 233 },
+            { x: 306, y: 345 },
+            { x: 328, y: 345 },
+        ],
     ];
 
     useEffect(() => {
@@ -40,7 +48,7 @@ function PhotoViewer() {
     }
 
     function startGame() {
-        setGameHasStarted(true)
+        setGameHasStarted(true);
         setIsRunning(true);
     }
 
@@ -59,21 +67,28 @@ function PhotoViewer() {
 
     function checkTagIsCorrect() {
         let isInside = false;
-        const numEdges = target.length;
-        for (let i = 0, j = numEdges - 1; i < numEdges; j = i, i++) {
-            const yIsBounded = tag.y < target[i].y !== tag.y < target[j].y;
-            const xIsBounded =
-                tag.x <
-                target[i].x +
-                    ((tag.y - target[i].y) / (target[j].y - target[i].y)) *
-                        (target[j].x - target[i].x);
-            console.log(`tag: ${tag.x}, ${tag.y}`, ``)
-            console.log('edge', `c1:(${target[i].x}, ${target[i].y}) - c2:(${target[j].x}, ${target[j].y})`)
-            console.log(`y is Bounded: ${yIsBounded}`)
-            console.log(`x intercepts: ${xIsBounded}`)
-            const castIntersects = yIsBounded && xIsBounded;
-            if (castIntersects) isInside = !isInside;
+        for (let target of targets) {
+            const numEdges = target.length;
+            for (let i = 0, j = numEdges - 1; i < numEdges; j = i, i++) {
+                const yIsBounded = tag.y < target[i].y !== tag.y < target[j].y;
+                const xIsBounded =
+                    tag.x <
+                    target[i].x +
+                        ((tag.y - target[i].y) / (target[j].y - target[i].y)) *
+                            (target[j].x - target[i].x);
+                console.log(`tag: ${tag.x}, ${tag.y}`, ``);
+                console.log(
+                    "edge",
+                    `c1:(${target[i].x}, ${target[i].y}) 
+                    - c2:(${target[j].x}, ${target[j].y})`
+                );
+                console.log(`y is Bounded: ${yIsBounded}`);
+                console.log(`x intercepts: ${xIsBounded}`);
+                const castIntersects = yIsBounded && xIsBounded;
+                if (castIntersects) isInside = !isInside;
+            }
         }
+
         return isInside;
     }
 
@@ -82,7 +97,7 @@ function PhotoViewer() {
         console.log("tag submitted");
         if (checkTagIsCorrect()) {
             setSuccessTime(time);
-            setIsRunning(false)
+            setIsRunning(false);
             setPlayerWon(true);
             setPlayerLost(false);
             toggleTagging();
