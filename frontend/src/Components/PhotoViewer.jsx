@@ -26,41 +26,41 @@ function PhotoViewer() {
             { x: 2232, y: 2525 },
             { x: 2401, y: 2524 },
         ],
-    ]
-
-    const targets = [
-        [
-            { x: 151, y: 171 },
-            { x: 149, y: 278 },
-            { x: 276, y: 231 },
-            { x: 279, y: 312 },
-        ],
-        [
-            { x: 306, y: 231 },
-            { x: 328, y: 233 },
-            { x: 306, y: 345 },
-            { x: 328, y: 345 },
-        ],
     ];
+
+    // const targets = [
+    //     [
+    //         { x: 151, y: 171 },
+    //         { x: 149, y: 278 },
+    //         { x: 276, y: 231 },
+    //         { x: 279, y: 312 },
+    //     ],
+    //     [
+    //         { x: 306, y: 231 },
+    //         { x: 328, y: 233 },
+    //         { x: 306, y: 345 },
+    //         { x: 328, y: 345 },
+    //     ],
+    // ];
 
     let scaledTarget;
     if (image.current) {
-        const scalingFactor = image.current.height / image.current.naturalHeight;
-        scaledTarget = targetOrig.map(target => 
-            target.map(coord => 
-                ( {
-                    x: scalingFactor * (coord.x + image.current.x), 
-                    y: scalingFactor * (coord.y + image.current.y)
-                })
-            )
-        )
-    //     console.log(
-    //         'image details:', image,
-    //         'image bound:', image.current.getBoundingClientRect(),
-    //         'scaling factor:', scalingFactor,
-    //         'scaled target:', scaledTarget,
-    //         'tag', tag
-    //         );
+        const scalingFactor =
+            image.current.height / image.current.naturalHeight;
+        scaledTarget = targetOrig.map((target) =>
+            target.map((coord) => ({
+                x: scalingFactor * (coord.x + image.current.x),
+                y: scalingFactor * (coord.y + image.current.y),
+
+            }))
+        );
+        //     console.log(
+        //         'image details:', image,
+        //         'image bound:', image.current.getBoundingClientRect(),
+        //         'scaling factor:', scalingFactor,
+        //         'scaled target:', scaledTarget,
+        //         'tag', tag
+        //         );
     }
 
     useEffect(() => {
@@ -115,7 +115,7 @@ function PhotoViewer() {
                 // console.log(`tag: ${tag.x}, ${tag.y}`, ``);
                 // console.log(
                 //     "edge",
-                //     `c1:(${target[i].x}, ${target[i].y}) 
+                //     `c1:(${target[i].x}, ${target[i].y})
                 //     - c2:(${target[j].x}, ${target[j].y})`
                 // );
                 // console.log(`y is Bounded: ${yIsBounded}`);
@@ -143,7 +143,6 @@ function PhotoViewer() {
         toggleTagging();
         return;
     }
-
 
     return (
         <div style={{ position: "relative" }}>
