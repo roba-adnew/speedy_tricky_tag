@@ -4,17 +4,44 @@ generator client {
 
 datasource db {
     provider  = "postgresql"
-    // Uses connection pooling
     url       = env("POSTGRES_PRISMA_URL")
-    // Uses direct connection, ⚠️ make sure to keep this to `POSTGRES_URL_NON_POOLING`
-    // or you'll have dangling databases from migrations
     directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
-model User {
-    id        Int      @id @default(autoincrement())
-    name      String
-    email     String   @unique
-    image     String?
-    createdAt DateTime @default(now())
+model Image {
+    id             String  @id @default(uuid())
+    name           String
+    url            String
+    riddle1        String
+    riddle1Answer  String
+    riddle1Targets Json
+    riddle2        String
+    riddle2Answer  String
+    riddle2Targets Json
+    riddle3        String
+    riddle3Answer  String
+    riddle3Targets Json
+    riddle4        String
+    riddle4Answer  String
+    riddle4Targets Json
+    riddle5        String
+    riddle5Answer  String
+    riddle5Targets Json
+    riddle6        String
+    riddle6Answer  String
+    riddle6Targets Json
+    riddle7        String
+    riddle7Answer  String
+    riddle7Targets Json
+    Scoreboard     Score[]
+}
+
+model Score {
+    userId      String   @id @default(uuid())
+    userName    String
+    image       Image    @relation(fields: [imageId], references: [id])
+    imageId     String
+    startTime   DateTime
+    timeSeconds Float
+    score       Float
 }

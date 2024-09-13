@@ -3,8 +3,8 @@ import starterImage from "/intersection.jpg";
 import "../Styles/PhotoViewer.css";
 
 function PhotoViewer() {
-    const [time, setTime] = useState(0);
-    const [successTime, setSuccessTime] = useState(0);
+    const [time, setTime] = useState(0); // move to server side
+    const [successTime, setSuccessTime] = useState(0); // move to server side
     const [gameHasStarted, setGameHasStarted] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const [isTagging, setIsTagging] = useState(false);
@@ -28,21 +28,6 @@ function PhotoViewer() {
         ],
     ];
 
-    // const targets = [
-    //     [
-    //         { x: 151, y: 171 },
-    //         { x: 149, y: 278 },
-    //         { x: 276, y: 231 },
-    //         { x: 279, y: 312 },
-    //     ],
-    //     [
-    //         { x: 306, y: 231 },
-    //         { x: 328, y: 233 },
-    //         { x: 306, y: 345 },
-    //         { x: 328, y: 345 },
-    //     ],
-    // ];
-
     let scaledTarget;
     if (image.current) {
         const scalingFactor =
@@ -51,19 +36,12 @@ function PhotoViewer() {
             target.map((coord) => ({
                 x: scalingFactor * (coord.x + image.current.x),
                 y: scalingFactor * (coord.y + image.current.y),
-
             }))
         );
-        //     console.log(
-        //         'image details:', image,
-        //         'image bound:', image.current.getBoundingClientRect(),
-        //         'scaling factor:', scalingFactor,
-        //         'scaled target:', scaledTarget,
-        //         'tag', tag
-        //         );
     }
 
     useEffect(() => {
+        // move to server side
         let interval;
         if (!isRunning) return;
         interval = setInterval(() => setTime((lastTime) => lastTime + 1), 100);
@@ -112,14 +90,7 @@ function PhotoViewer() {
                     target[i].x +
                         ((tag.y - target[i].y) / (target[j].y - target[i].y)) *
                             (target[j].x - target[i].x);
-                // console.log(`tag: ${tag.x}, ${tag.y}`, ``);
-                // console.log(
-                //     "edge",
-                //     `c1:(${target[i].x}, ${target[i].y})
-                //     - c2:(${target[j].x}, ${target[j].y})`
-                // );
-                // console.log(`y is Bounded: ${yIsBounded}`);
-                // console.log(`x intercepts: ${xIsBounded}`);
+
                 const castIntersects = yIsBounded && xIsBounded;
                 if (castIntersects) isInside = !isInside;
             }
