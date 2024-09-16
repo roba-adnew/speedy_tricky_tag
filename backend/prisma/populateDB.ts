@@ -8,14 +8,14 @@ const mime = require("mime-types");
 dotenv.config({ path: "./.env" });
 if (!process.env.SB_API_URL || !process.env.SB_API_KEY) {
     console.error(
-        "Error: Supabase URL or API key is missing. Please check your .env file."
+        "Error: Supabase URL or API key is missing. \
+        Please check your .env file."
     );
     process.exit(1);
 }
 
 const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
-
 
 type ImageData = {
     riddle1: string;
@@ -281,6 +281,7 @@ async function addImages() {
         const imageContent = fs.readFileSync(imagePath);
         const mime_type = mime.lookup(image);
 
+        console.log('image name and type', image, mime_type)
         const { data, error } = await supabase.storage
             .from("images")
             .upload(`public/${image}`, imageContent, {
@@ -302,8 +303,8 @@ async function addImages() {
         const imageData = targets[image] || {};
 
         const imageRecord = await prisma.image.create({
-            data: { 
-                name: image, 
+            data: {
+                name: image,
                 url: publicUrl,
                 riddle1: imageData.riddle1,
                 riddle1Answer: imageData.riddle1Answer,
@@ -326,14 +327,12 @@ async function addImages() {
                 riddle7: imageData.riddle7,
                 riddle7Answer: imageData.riddle7Answer,
                 riddle7Targets: imageData.riddle7Targets,
-             },
+            },
         });
 
-        console.log('postgres addition:', imageRecord)
+        console.log("postgres addition:", imageRecord);
     });
 }
-
-
 
 addImages()
     .then(async () => {

@@ -1,17 +1,38 @@
 import { useState, useEffect, useRef } from "react";
-import starterImage from "/intersection.jpg";
+import { getImageDetails as apiGetImage } from "../utils/api";
 import "../Styles/PhotoViewer.css";
 
 function PhotoViewer() {
     const [time, setTime] = useState(0); // move to server side
     const [successTime, setSuccessTime] = useState(0); // move to server side
+    const [image, setFile] = useState(null);
     const [gameHasStarted, setGameHasStarted] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const [isTagging, setIsTagging] = useState(false);
     const [playerWon, setPlayerWon] = useState(false);
     const [playerLost, setPlayerLost] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
-    const image = useRef(null);
+    const imageRef = useRef(null);
+
+    useEffect(() => {
+        async function getFile() {
+            const fileObject = await apiGetImage("busy_beach.jpg");
+            setFile(fileObject);
+        }
+        getFile();
+    }, []);
+
+    useEffect(() => {
+        // move to server side
+        let interval;
+        if (!isRunning) return;
+        interval = setInterval(() => setTime((lastTime) => lastTime + 1), 100);
+        return () => clearInterval(interval);
+    }, [isRunning]);
+
+    if (!image || !image.details) {
+        return <div>No file data available</div>;
+    }
 
     const targetOrig = [
         [
@@ -39,14 +60,6 @@ function PhotoViewer() {
             }))
         );
     }
-
-    useEffect(() => {
-        // move to server side
-        let interval;
-        if (!isRunning) return;
-        interval = setInterval(() => setTime((lastTime) => lastTime + 1), 100);
-        return () => clearInterval(interval);
-    }, [isRunning]);
 
     function formattedTime(time) {
         const totalSeconds = time / 10;
@@ -125,10 +138,10 @@ function PhotoViewer() {
                 <>
                     <img
                         className="photo"
-                        src={starterImage}
+                        src={image}
                         alt="Intersection"
                         onClick={tagTarget}
-                        ref={image}
+                        ref={imageRef}
                     />
                     <div>{formattedTime(time)}</div>
                     {playerWon && (

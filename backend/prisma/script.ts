@@ -59,17 +59,9 @@ async function clearSupabaseAndPostgres() {
     }
 }
 
-// async function createUser() {
-//   const newUser = await prisma.user.create({
-//     data: {
-//       name: 'Elliott',
-//       email: 'xelliottx@example-user.com',
-//     },
-//   });
-// }
 
 async function selectAll() {
-    const images = await prisma.image.findMany({});
+    const images = await prisma.image.findMany();
     const scores = await prisma.score.findMany();
     console.log("images:", JSON.stringify(images, null, 2));
     console.log("scores:", scores);

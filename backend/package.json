@@ -4,18 +4,25 @@
     "main": "index.js",
     "scripts": {
         "vercel-build": "prisma generate && prisma migrate deploy && echo hello",
-        "query": "nodemon script.ts",
-        "populate": "nodemon populateDB.ts"
+        "query": "nodemon prisma/script.ts",
+        "populate": "nodemon prisma/populateDB.ts",
+        "devstart": "nodemon server.js"
     },
     "author": "",
     "license": "ISC",
     "description": "",
     "dependencies": {
         "@prisma/client": "^5.19.1",
+        "@quixo3/prisma-session-store": "^3.1.13",
         "@supabase/supabase-js": "^2.45.4",
         "@types/node": "^22.5.4",
         "@vercel/postgres": "^0.10.0",
+        "cookie-parser": "^1.4.6",
+        "cors": "^2.8.5",
+        "debug": "^4.3.7",
         "dotenv": "^16.4.5",
+        "express": "^4.21.0",
+        "express-session": "^1.18.0",
         "mime-types": "^2.1.35",
         "nodemon": "^3.1.4",
         "prisma": "^5.19.1",
