@@ -67,7 +67,7 @@ async function selectAll() {
     console.log("scores:", scores);
 }
 
-selectAll()
+clearSupabaseAndPostgres()
     .then(async () => {
         await prisma.$disconnect();
     })

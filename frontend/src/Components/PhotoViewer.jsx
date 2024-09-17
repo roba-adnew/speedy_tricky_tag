@@ -128,6 +128,8 @@ function PhotoViewer() {
         return;
     }
 
+    if (image) console.log(image.details)
+
     return (
         <div style={{ position: "relative" }}>
             {!gameHasStarted ? (
