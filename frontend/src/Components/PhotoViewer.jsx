@@ -6,6 +6,7 @@ function PhotoViewer() {
     const [time, setTime] = useState(0); // move to server side
     const [successTime, setSuccessTime] = useState(0); // move to server side
     const [image, setImage] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const [gameHasStarted, setGameHasStarted] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const [isTagging, setIsTagging] = useState(false);
@@ -18,9 +19,10 @@ function PhotoViewer() {
         async function getFile() {
             const fileObject = await apiGetImage("intersection.jpg");
             setImage(fileObject);
+            setIsLoading(false)
         }
-        if (isRunning) getFile();
-    }, [isRunning]);
+        if (gameHasStarted) getFile();
+    }, [gameHasStarted]);
 
     useEffect(() => {
         // move to server side
@@ -30,7 +32,12 @@ function PhotoViewer() {
         return () => clearInterval(interval);
     }, [isRunning]);
 
-    if (gameHasStarted && (!image || !image.details)) {
+    if (isLoading) {
+        return <div>getting the game ready!</div>;
+
+    }
+
+    if (gameHasStarted && !isLoading && !image) {
         return <div>No file data available</div>;
     }
 
@@ -75,6 +82,7 @@ function PhotoViewer() {
     }
 
     function startGame() {
+        setIsLoading(true)
         setGameHasStarted(true);
         setIsRunning(true);
     }
