@@ -4,8 +4,7 @@ const base_url = `${domain}/images`;
 
 async function getImageDetails(fileName) {
     const download_url = `${base_url}/download`;
-    console.log('download url: ', download_url)
-    // const details_url = `${base_url}/details`;
+    const details_url = `${base_url}/meta`;
 
     const options = {
         method: "POST",
@@ -15,15 +14,15 @@ async function getImageDetails(fileName) {
     };
     try {
         const downloadResponse = await fetch(download_url, options);
-        // const detailsResponse = await fetch(details_url, options);
-
         const blob = await downloadResponse.blob();
         const content = URL.createObjectURL(blob);
-        // const detailsResults = await detailsResponse.json();
+
+        const detailsResponse = await fetch(details_url, options);
+        const detailsResults = await detailsResponse.json();
 
         const file = {
             content: content,
-            details: "null", // update
+            details: detailsResults,
         };
 
         return file;

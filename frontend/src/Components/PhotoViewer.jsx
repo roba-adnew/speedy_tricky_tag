@@ -5,7 +5,7 @@ import "../Styles/PhotoViewer.css";
 function PhotoViewer() {
     const [time, setTime] = useState(0); // move to server side
     const [successTime, setSuccessTime] = useState(0); // move to server side
-    const [image, setFile] = useState(null);
+    const [image, setImage] = useState(null);
     const [gameHasStarted, setGameHasStarted] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const [isTagging, setIsTagging] = useState(false);
@@ -16,11 +16,11 @@ function PhotoViewer() {
 
     useEffect(() => {
         async function getFile() {
-            const fileObject = await apiGetImage("busy_beach.jpg");
-            setFile(fileObject);
+            const fileObject = await apiGetImage("intersection.jpg");
+            setImage(fileObject);
         }
-        getFile();
-    }, []);
+        if (isRunning) getFile();
+    }, [isRunning]);
 
     useEffect(() => {
         // move to server side
@@ -30,7 +30,7 @@ function PhotoViewer() {
         return () => clearInterval(interval);
     }, [isRunning]);
 
-    if (!image || !image.details) {
+    if (gameHasStarted && (!image || !image.details)) {
         return <div>No file data available</div>;
     }
 
@@ -50,7 +50,7 @@ function PhotoViewer() {
     ];
 
     let scaledTarget;
-    if (image.current) {
+    if (image?.current) {
         const scalingFactor =
             image.current.height / image.current.naturalHeight;
         scaledTarget = targetOrig.map((target) =>
@@ -138,7 +138,7 @@ function PhotoViewer() {
                 <>
                     <img
                         className="photo"
-                        src={image}
+                        src={image.content}
                         alt="Intersection"
                         onClick={tagTarget}
                         ref={imageRef}
