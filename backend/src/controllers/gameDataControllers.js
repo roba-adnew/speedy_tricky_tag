@@ -47,14 +47,69 @@ exports.getImageMeta = async (req, res, next) => {
     }
 
     try {
-        const imageMetaRaw = await prisma.image.findFirst({
+        const imageMeta = await prisma.image.findFirst({
             where: { name: name },
         });
-        const imageMeta = JSON.stringify(imageMetaRaw, null, 1);
         debug("prisma results:", imageMeta);
 
-        return res.json(imageMetaRaw);
+        return res.json(imageMeta);
     } catch (err) {
         debug("unexpected error", err);
     }
+};
+
+const userTimers = new Map();
+
+
+exports.startTimer = async (req, res, next) => {
+    debug("image request body: %O", req.body);
+    const sessionID = req.sessionID;
+    debug("starter sessionId:", sessionID);
+
+    const timerData = { signal: null, time: 0 }
+
+    if (userTimers.has(sessionID)) {
+        return res
+            .status(400)
+            .json({ message: "Timer already running for this session" });
+    }
+
+    const interval = setInterval(() => {
+        timerData.time++;
+        if (timerData.signal === "stop") {
+            clearInterval(interval);
+        }
+    }, 100);
+
+    userTimers.set(sessionID, timerData);
+    return res.status(200).json({ message: "timer set-up" });
+};
+
+exports.stopTimer = async (req, res, next) => {
+    const sessionID = req.sessionID;
+    const { signal } = req.body;
+    debug("stopper sessionId:", sessionID);
+
+    if (!userTimers.has(sessionID)) {
+        return res.status(400).json({ message: "No timer set for this user" });
+    }
+
+    if (signal === "stop") {
+        const timerData = userTimers.get(sessionID);
+        timerData.signal = signal;
+        return res.status(200).json({ message: "Signal set to stop" });
+    }
+    return res.status(400).json({ message: "Invalid signal" });
+};
+
+exports.getTime = (req, res, next) => {
+    const sessionID = req.sessionID;
+    if (!userTimers.has(sessionID)) {
+        return res
+            .status(400)
+            .json({ message: "No timer running for this session" });
+    }
+    const timerData = userTimers.get(sessionID);
+
+    res.json({ time: timerData.time });
 };

@@ -27,9 +27,65 @@ async function getImageDetails(fileName) {
 
         return file;
     } catch (err) {
-        console.error("file details retrieval error:", err);
+        console.error("image retrieval error:", err);
         throw err;
     }
 }
 
-export { getImageDetails };
+async function startTimer() {
+    const url = `${base_url}/start-timer`;
+
+    const options = {
+        method: "POST",
+        credentials: "include",
+    };
+
+    try {
+        const response = await fetch(url, options);
+        const results = await response.json();
+        return results;
+    } catch (err) {
+        console.error("timer commencement error:", err);
+        throw err;
+    }
+}
+
+async function stopTimer() {
+    const url = `${base_url}/stop-timer`;
+
+    const options = {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify({ signal: "stop" }),
+    };
+
+    try {
+        const response = await fetch(url, options);
+        const results = await response.json();
+        return results;
+    } catch (err) {
+        console.error("timer commencement error:", err);
+        throw err;
+    }
+}
+
+async function getTime() {
+    const url = `${base_url}/get-time`;
+
+    const options = {
+        method: "POST",
+        credentials: "include",
+    };
+
+    try {
+        const response = await fetch(url, options);
+        const json = await response.json();
+        return json.time;
+    } catch (err) {
+        console.error("timer retrieval error:", err);
+        throw err;
+    }
+}
+
+export { getImageDetails, startTimer, getTime, stopTimer };

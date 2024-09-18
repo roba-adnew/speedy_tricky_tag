@@ -1,11 +1,17 @@
 import { useState, useEffect, useRef } from "react";
-import { getImageDetails as apiGetImage } from "../utils/api";
+import {
+    getImageDetails as apiGetImage,
+    startTimer as apiStartTimer,
+    stopTimer as apiStopTimer,
+    getTime as apiGetTime,
+} from "../utils/api";
 import "../Styles/PhotoViewer.css";
 
 function PhotoViewer() {
     const [time, setTime] = useState(0); // move to server side
     const [successTime, setSuccessTime] = useState(0); // move to server side
     const [image, setImage] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const [gameHasStarted, setGameHasStarted] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const [isTagging, setIsTagging] = useState(false);
@@ -18,19 +24,64 @@ function PhotoViewer() {
         async function getFile() {
             const fileObject = await apiGetImage("intersection.jpg");
             setImage(fileObject);
+            setIsLoading(false);
+            await apiStartTimer();
+            setIsRunning(true);
         }
-        if (isRunning) getFile();
-    }, [isRunning]);
+        if (gameHasStarted) getFile();
+    }, [gameHasStarted]);
+
+    // useEffect(() => {
+    //     // move to server side
+    //     let interval;
+    //     if (!isRunning) return;
+    //     interval = setInterval(() => setTime((lastTime) => lastTime + 1), 100);
+    //     return () => clearInterval(interval);
+    // }, [isRunning]);
+
+    // useEffect(async () => {
+    //     try {
+    //         await apiStartTimer();
+
+    //     } catch (err) {
+    //         console.error(err)
+    //     }
+    //     return () => clearTimeout(timeout);
+    // }, [isRunning]);
 
     useEffect(() => {
-        // move to server side
+        async function fetchTime() {
+            try {
+                const time = await apiGetTime();
+                setTime(time);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
         let interval;
-        if (!isRunning) return;
-        interval = setInterval(() => setTime((lastTime) => lastTime + 1), 100);
-        return () => clearInterval(interval);
+        if (isRunning) {
+            fetchTime();
+            interval = setInterval(fetchTime, 100);
+        }
+
+        return async () => {
+            if (!isRunning) {
+                clearInterval(interval);
+            }
+        };
     }, [isRunning]);
 
-    if (gameHasStarted && (!image || !image.details)) {
+    async function startGame() {
+        setIsLoading(true);
+        setGameHasStarted(true);
+    }
+
+    if (isLoading) {
+        return <div>getting the game ready!</div>;
+    }
+
+    if (gameHasStarted && !isLoading && !image) {
         return <div>No file data available</div>;
     }
 
@@ -74,11 +125,6 @@ function PhotoViewer() {
         return displayTime;
     }
 
-    function startGame() {
-        setGameHasStarted(true);
-        setIsRunning(true);
-    }
-
     function toggleTagging() {
         setIsTagging(!isTagging);
     }
@@ -92,7 +138,7 @@ function PhotoViewer() {
         toggleTagging();
     }
 
-    function checkTagIsCorrect() {
+    function validateTag() {
         let isInside = false;
         for (let target of scaledTarget) {
             const numEdges = target.length;
@@ -112,10 +158,11 @@ function PhotoViewer() {
         return isInside;
     }
 
-    function handleTagSubmission(e) {
+    async function handleTagSubmission(e) {
         e.preventDefault();
         console.log("tag submitted");
-        if (checkTagIsCorrect()) {
+        if (validateTag()) {
+            await apiStopTimer();
             setSuccessTime(time);
             setIsRunning(false);
             setPlayerWon(true);
@@ -128,7 +175,7 @@ function PhotoViewer() {
         return;
     }
 
-    if (image) console.log(image.details)
+    if (image) console.log(image.details);
 
     return (
         <div style={{ position: "relative" }}>

@@ -32,10 +32,11 @@ app.use(
             maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day in ms
             sameSite: "lax",
             secure: false,
+            httpOnly: true,
         },
         secret: process.env.SESSION_SECRET,
         resave: false, // only resave on change
-        saveUninitialized: false, // only save on user authentication
+        saveUninitialized: true, // save without being initialized since there is no auth 
         store: prismaSession,
     })
 );
