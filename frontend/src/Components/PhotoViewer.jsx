@@ -159,6 +159,8 @@ function PhotoViewer() {
         return;
     }
 
+    if (targets) console.log(scaledTargets)
+
     return (
         <div style={{ position: "relative" }}>
             {!gameHasStarted ? (
@@ -177,8 +179,14 @@ function PhotoViewer() {
                     {isRunning && <div>{formattedTime(time)}</div>}
                     {playerWon && <div>{formattedTime(successTime)}</div>}
                     {Object.keys(image.details).map((riddle) => {
+                        const currentRiddle = image.details[riddle];
                         return (
-                            <p key={riddle.answer}>
+                            <p
+                                key={currentRiddle.answer}
+                                onClick={() =>
+                                    setTargets(currentRiddle.targets)
+                                }
+                            >
                                 {image.details[riddle].question}
                             </p>
                         );
