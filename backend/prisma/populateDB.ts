@@ -30,7 +30,10 @@ type Targets = {
 const targets: Targets = {
     "flea_market.jpg": [
         {
-            question: "face",
+            question:
+                "I can express joy, sadness, or fear; I'm what you see \
+            when you look in a mirror; On a clock, I help tell time and pace; \
+            What am I that's both feature and place?",
             answer: "face",
             targets: [
                 [
@@ -42,7 +45,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "flashlight",
+            question:
+                "In darkness, I become your guide; With batteries and \
+            bulb inside; A beam of light from handheld might; What am I that \
+            shines so bright?",
             answer: "flashlight",
             targets: [
                 [
@@ -54,7 +60,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "trophy",
+            question:
+                "A symbol of victory, shiny and grand; Held up high when \
+            champions stand; Placed on a shelf for all to see; What is this\
+            prize awarded to thee?",
             answer: "trophy",
             targets: [
                 [
@@ -66,7 +75,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "helmet",
+            question:
+                "Worn on the head for safety's sake; By soldiers, riders,\
+             and those who race; Protecting from harm in every event; What is \
+             this hard-shell ornament?",
             answer: "helmet",
             targets: [
                 [
@@ -78,7 +90,9 @@ const targets: Targets = {
             ],
         },
         {
-            question: "horse",
+            question:
+                "With mane and tail, I gallop fast; In fields and races,\
+             my shadow is cast; A noble steed of strength and force; What am I?",
             answer: "horse",
             targets: [
                 [
@@ -90,8 +104,11 @@ const targets: Targets = {
             ],
         },
         {
-            question: "fannypack",
-            answer: "fannypack",
+            question:
+                "Worn around the waist, compact and snug; Holding keys, \
+            phone, and perhaps a mug; Handy for travel without a sack; What is\
+             this pouch called? Think back.",
+            answer: "fanny pack",
             targets: [
                 [
                     { x: 1411, y: 1334 },
@@ -102,7 +119,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "shotglasses",
+            question:
+                "Small vessels lined up in a row; Filled with spirits \
+            ready to go; Raise me up for a quick cheers; What are these tiny \
+            cups found in bars and fairs?",
             answer: "shotglasses",
             targets: [
                 [
@@ -116,7 +136,10 @@ const targets: Targets = {
     ],
     "intersection.jpg": [
         {
-            question: "lion",
+            question:
+                "I am called a king without a throne, My mighty \
+            roar chills to the bone. With a mane of gold, I roam the land, \
+            The savannah is where I make my stand. Who am I?",
             answer: "lion",
             targets: [
                 [
@@ -134,7 +157,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "prudential",
+            question:
+                "I represent wisdom in choices you make, A careful \
+            approach for safety's sake. An insurance giant with a towering \
+            sign, A rock that endures the test of time. Who am I?",
             answer: "prudential",
             targets: [
                 [
@@ -146,7 +172,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "campaign",
+            question:
+                "I am a journey with a goal in sight, In politics or war,\
+             I lead the fight. A series of actions, a strategic plan, To win \
+             hearts or battles across the land. What am I?",
             answer: "campaign",
             targets: [
                 [
@@ -158,7 +187,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "times",
+            question:
+                "I come in good and hard, and sometimes trying \
+            Newspapers use me in their name without lying. I represent eras \
+            and moments that pass, Counting me helps history amass. What am I?",
             answer: "times",
             targets: [
                 [
@@ -170,7 +202,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "duck",
+            question:
+                "I waddle on land and glide on a lake; Quacking aloud, \
+            the sounds I make; Hunters may seek me in season's luck; Feathered \
+            and billed, I am a...?",
             answer: "duck",
             targets: [
                 [
@@ -182,7 +217,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "beer",
+            question:
+                "Brewed from barley, hops, and yeast; In a pint or mug, \
+            I am released; A frothy head and golden hue; At pubs and bars, I'm \
+            poured for you; What am I?",
             answer: "beer",
             targets: [
                 [
@@ -194,7 +232,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "selfie",
+            question:
+                "A photo taken at arm's length; To capture yourself with \
+            all your strength; Shared on social media for all to see; This\
+            modern portrait is called a...?",
             answer: "selfie",
             targets: [
                 [
@@ -208,7 +249,10 @@ const targets: Targets = {
     ],
     "busy_beach.jpg": [
         {
-            question: "horses",
+            question:
+                "Strong and swift with flowing mane, we pull the cart and\
+             race the lane; Once vital in wars, now in sport we thrive; With\
+              hooves that thunder, we come alive; What am we?",
             answer: "horses",
             targets: [
                 [
@@ -220,8 +264,11 @@ const targets: Targets = {
             ],
         },
         {
-            question: "fishingnet",
-            answer: "fishingnet",
+            question:
+                "Cast me wide into the sea; To catch some fish is the \
+            hope for me; With mesh and lines carefully set; What tool am I that\
+             fishers get?",
+            answer: "fishing net",
             targets: [
                 [
                     { x: 510, y: 618 },
@@ -232,8 +279,11 @@ const targets: Targets = {
             ],
         },
         {
-            question: "clocktower",
-            answer: "clocktower",
+            question:
+                "I stand tall in the center of town; My hands move but I\
+             make no sound; When bells ring, the hour I tell; What structure \
+             am I? Can you spell?",
+            answer: "clock tower",
             targets: [
                 [
                     { x: 345, y: 286 },
@@ -244,7 +294,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "car",
+            question:
+                "With four wheels rolling down the street; An engine \
+            powers my front seat; From place to place, near or far; Hop in and\
+             ride—what am I?",
             answer: "car",
             targets: [
                 [
@@ -256,7 +309,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "signature",
+            question:
+                "A unique mark made by your hand; On dotted lines is \
+            where I stand; Authenticating documents pure; What is this personal\
+             script called, for sure?",
             answer: "signature",
             targets: [
                 [
@@ -268,7 +324,10 @@ const targets: Targets = {
             ],
         },
         {
-            question: "fence",
+            question:
+                "I can be wooden, metal, or wire; Surrounding yards, I'm \
+            often higher; Defining borders in every sense; What am I? A \
+            boundary...?",
             answer: "fence",
             targets: [
                 [
@@ -280,8 +339,11 @@ const targets: Targets = {
             ],
         },
         {
-            question: "whitedog",
-            answer: "whitedog",
+            question:
+                "Covered in fur as pale as snow; A loyal friend wherever \
+            you go; From fluffy Samoyeds to little Bichons; What am I, in \
+            canine forms?",
+            answer: "white dog",
             targets: [
                 [
                     { x: 119, y: 662 },
