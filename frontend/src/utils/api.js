@@ -3,6 +3,7 @@ const domain =
 const base_url = `${domain}/images`;
 
 async function getImageDetails(fileName) {
+    console.log(base_url)
     const download_url = `${base_url}/download`;
     const details_url = `${base_url}/meta`;
 

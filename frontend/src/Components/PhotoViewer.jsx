@@ -12,12 +12,14 @@ function PhotoViewer() {
     const [successTime, setSuccessTime] = useState(0);
     const [image, setImage] = useState(null);
     const [targets, setTargets] = useState(null);
+    const [numRiddles, setNumRiddles] = useState(0);
+    const [numCorrect, setNumCorrect] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
     const [gameHasStarted, setGameHasStarted] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
     const [isTagging, setIsTagging] = useState(false);
-    const [playerWon, setPlayerWon] = useState(false);
-    const [playerLost, setPlayerLost] = useState(false);
+    const [playerCorrect, setPlayerCorrect] = useState(false);
+    const [playerWrong, setPlayerWrong] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
     const imageRef = useRef(null);
 
@@ -25,7 +27,13 @@ function PhotoViewer() {
         async function getFile() {
             const fileObject = await apiGetImage("intersection.jpg");
             setImage(fileObject);
-            setTargets(fileObject.details.riddle1.targets);
+
+            const defaultRiddleTargets = fileObject.details.riddle1.targets;
+            setTargets(defaultRiddleTargets);
+
+            const riddleCount = Object.keys(fileObject.details).length;
+            setNumRiddles(riddleCount);
+
             setIsLoading(false);
             await apiStartTimer();
             setIsRunning(true);
@@ -148,18 +156,19 @@ function PhotoViewer() {
         if (validateTag()) {
             await apiStopTimer();
             setSuccessTime(time);
+            setNumCorrect((numCorrect) => numCorrect++);
             setIsRunning(false);
-            setPlayerWon(true);
-            setPlayerLost(false);
+            setPlayerCorrect(true);
+            setPlayerWrong(false);
             toggleTagging();
             return;
         }
-        setPlayerLost(true);
+        setPlayerWrong(true);
         toggleTagging();
         return;
     }
 
-    if (targets) console.log(scaledTargets)
+    if (numCorrect === numRiddles) console.log("YOU WIN!");
 
     return (
         <div style={{ position: "relative" }}>
@@ -177,7 +186,7 @@ function PhotoViewer() {
                         ref={imageRef}
                     />
                     {isRunning && <div>{formattedTime(time)}</div>}
-                    {playerWon && <div>{formattedTime(successTime)}</div>}
+                    {playerCorrect && <div>{formattedTime(successTime)}</div>}
                     {Object.keys(image.details).map((riddle) => {
                         const currentRiddle = image.details[riddle];
                         return (
@@ -191,12 +200,12 @@ function PhotoViewer() {
                             </p>
                         );
                     })}
-                    {playerWon && (
+                    {playerCorrect && (
                         <div>
                             you got it right in {formattedTime(successTime)}!
                         </div>
                     )}
-                    {playerLost && (
+                    {playerWrong && (
                         <div>
                             sorry, you got it wrong, but keep going, time is
                             ticking!
