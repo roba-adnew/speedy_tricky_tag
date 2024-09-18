@@ -8,9 +8,10 @@ import {
 import "../Styles/PhotoViewer.css";
 
 function PhotoViewer() {
-    const [time, setTime] = useState(0); // move to server side
-    const [successTime, setSuccessTime] = useState(0); // move to server side
+    const [time, setTime] = useState(0);
+    const [successTime, setSuccessTime] = useState(0);
     const [image, setImage] = useState(null);
+    const [targets, setTargets] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [gameHasStarted, setGameHasStarted] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
@@ -24,30 +25,13 @@ function PhotoViewer() {
         async function getFile() {
             const fileObject = await apiGetImage("intersection.jpg");
             setImage(fileObject);
+            setTargets(fileObject.details.riddle1.targets);
             setIsLoading(false);
             await apiStartTimer();
             setIsRunning(true);
         }
         if (gameHasStarted) getFile();
     }, [gameHasStarted]);
-
-    // useEffect(() => {
-    //     // move to server side
-    //     let interval;
-    //     if (!isRunning) return;
-    //     interval = setInterval(() => setTime((lastTime) => lastTime + 1), 100);
-    //     return () => clearInterval(interval);
-    // }, [isRunning]);
-
-    // useEffect(async () => {
-    //     try {
-    //         await apiStartTimer();
-
-    //     } catch (err) {
-    //         console.error(err)
-    //     }
-    //     return () => clearTimeout(timeout);
-    // }, [isRunning]);
 
     useEffect(() => {
         async function fetchTime() {
@@ -72,6 +56,18 @@ function PhotoViewer() {
         };
     }, [isRunning]);
 
+    let scaledTargets;
+    if (imageRef?.current && targets) {
+        const scalingFactor =
+            imageRef.current.height / imageRef.current.naturalHeight;
+        scaledTargets = targets.map((target) =>
+            target.map((coord) => ({
+                x: scalingFactor * (coord.x + imageRef.current.x),
+                y: scalingFactor * (coord.y + imageRef.current.y),
+            }))
+        );
+    }
+
     async function startGame() {
         setIsLoading(true);
         setGameHasStarted(true);
@@ -85,35 +81,23 @@ function PhotoViewer() {
         return <div>No file data available</div>;
     }
 
-    const targetOrig = [
-        [
-            { x: 1094, y: 1231 },
-            { x: 1076, y: 2024 },
-            { x: 2013, y: 1674 },
-            { x: 2021, y: 2292 },
-        ],
-        [
-            { x: 2238, y: 1676 },
-            { x: 2393, y: 1684 },
-            { x: 2232, y: 2525 },
-            { x: 2401, y: 2524 },
-        ],
-    ];
+    // const targetOrig = [
+    //     [
+    //         { x: 1094, y: 1231 },
+    //         { x: 1076, y: 2024 },
+    //         { x: 2013, y: 1674 },
+    //         { x: 2021, y: 2292 },
+    //     ],
+    //     [
+    //         { x: 2238, y: 1676 },
+    //         { x: 2393, y: 1684 },
+    //         { x: 2232, y: 2525 },
+    //         { x: 2401, y: 2524 },
+    //     ],
+    // ];
 
-    let scaledTarget;
-    if (image?.current) {
-        const scalingFactor =
-            image.current.height / image.current.naturalHeight;
-        scaledTarget = targetOrig.map((target) =>
-            target.map((coord) => ({
-                x: scalingFactor * (coord.x + image.current.x),
-                y: scalingFactor * (coord.y + image.current.y),
-            }))
-        );
-    }
-
-    function formattedTime(time) {
-        const totalSeconds = time / 10;
+    function formattedTime(timeMS) {
+        const totalSeconds = timeMS / 1000; // time in API in MS;
 
         const minutes = Math.floor(totalSeconds / 60);
         const displayMinutes = `${minutes.toString().padStart(2, "0")}`;
@@ -140,7 +124,7 @@ function PhotoViewer() {
 
     function validateTag() {
         let isInside = false;
-        for (let target of scaledTarget) {
+        for (let target of scaledTargets) {
             const numEdges = target.length;
             for (let i = 0, j = numEdges - 1; i < numEdges; j = i, i++) {
                 const yIsBounded = tag.y < target[i].y !== tag.y < target[j].y;
@@ -175,8 +159,6 @@ function PhotoViewer() {
         return;
     }
 
-    if (image) console.log(image.details);
-
     return (
         <div style={{ position: "relative" }}>
             {!gameHasStarted ? (
@@ -192,7 +174,15 @@ function PhotoViewer() {
                         onClick={tagTarget}
                         ref={imageRef}
                     />
-                    <div>{formattedTime(time)}</div>
+                    {isRunning && <div>{formattedTime(time)}</div>}
+                    {playerWon && <div>{formattedTime(successTime)}</div>}
+                    {Object.keys(image.details).map((riddle) => {
+                        return (
+                            <p key={riddle.answer}>
+                                {image.details[riddle].question}
+                            </p>
+                        );
+                    })}
                     {playerWon && (
                         <div>
                             you got it right in {formattedTime(successTime)}!

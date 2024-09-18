@@ -14,8 +14,6 @@ if (!process.env.SB_API_URL || !process.env.SB_API_KEY) {
 const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 
-type Target = { x: number; y: number }[];
-
 async function clearSupabaseAndPostgres() {
     try {
         const imageDeletion = await prisma.image.deleteMany();
@@ -58,7 +56,6 @@ async function clearSupabaseAndPostgres() {
         console.error(err);
     }
 }
-
 
 async function selectAll() {
     const images = await prisma.image.findMany();

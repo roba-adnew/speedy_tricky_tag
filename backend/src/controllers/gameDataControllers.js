@@ -50,6 +50,15 @@ exports.getImageMeta = async (req, res, next) => {
     try {
         const imageMeta = await prisma.image.findFirst({
             where: { name: name },
+            select: {
+                riddle1: true,
+                riddle2: true,
+                riddle3: true,
+                riddle4: true,
+                riddle5: true,
+                riddle6: true,
+                riddle7: true,
+            }
         });
         debug("prisma results:", imageMeta);
 
@@ -73,13 +82,13 @@ exports.startTimer = async (req, res, next) => {
     const timerData = { signal: null, time: 0 };
 
     const interval = setInterval(() => {
-        timerData.time++;
+        timerData.time += 80;
 
         if (timerData.signal === "stop") {
             clearInterval(interval);
             userTimers.delete(sessionID);
         }
-    }, 100);
+    }, 80);
 
     userTimers.set(sessionID, timerData);
     return res.status(200).json({ message: "timer set-up" });
@@ -110,6 +119,7 @@ exports.getTime = (req, res, next) => {
             .json({ message: "No timer running for this session" });
     }
     const timerData = userTimers.get(sessionID);
+    debug('time: ', timerData.time)
 
     res.json({ time: timerData.time });
 };
