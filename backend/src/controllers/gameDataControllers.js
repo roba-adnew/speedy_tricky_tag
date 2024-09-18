@@ -5,6 +5,7 @@ const { createClient } = require("@supabase/supabase-js");
 
 const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
+const userTimers = new Map();
 
 exports.downloadImage = async (req, res, next) => {
     debug("image request body: %O", req.body);
@@ -58,15 +59,10 @@ exports.getImageMeta = async (req, res, next) => {
     }
 };
 
-const userTimers = new Map();
-
-
 exports.startTimer = async (req, res, next) => {
     debug("image request body: %O", req.body);
     const sessionID = req.sessionID;
     debug("starter sessionId:", sessionID);
-
-    const timerData = { signal: null, time: 0 }
 
     if (userTimers.has(sessionID)) {
         return res
@@ -74,10 +70,14 @@ exports.startTimer = async (req, res, next) => {
             .json({ message: "Timer already running for this session" });
     }
 
+    const timerData = { signal: null, time: 0 };
+
     const interval = setInterval(() => {
         timerData.time++;
+
         if (timerData.signal === "stop") {
             clearInterval(interval);
+            userTimers.delete(sessionID);
         }
     }, 100);
 
