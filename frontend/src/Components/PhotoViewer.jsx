@@ -8,7 +8,7 @@ import "../Styles/PhotoViewer.css";
 
 function PhotoViewer() {
     const [playerCorrect, setPlayerCorrect] = useState(false);
-    const [playerWrong, setPlayerWrong] = useState(false);
+    const [playerWon, setPlayerWon] = useState(false);
     const [gameHasStarted, setGameHasStarted] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
 
@@ -29,7 +29,9 @@ function PhotoViewer() {
             setImage(imageFile);
 
             const imageRiddles = fileObject.details;
-            Object.keys(imageRiddles).forEach((key) => (imageRiddles[key].answered = false));
+            Object.keys(imageRiddles).forEach(
+                (key) => (imageRiddles[key].answered = false)
+            );
 
             setRiddles(fileObject.details);
 
@@ -116,16 +118,40 @@ function PhotoViewer() {
         return isInside;
     }
 
+    function checkRoundCompleted(riddles) {
+        const isAnswered = (flag) => flag === true;
+        const answeredFlags = Object.keys(riddles).map(
+            (riddle) => riddles[riddle].answered
+        );
+        console.log("answers so far:", answeredFlags);
+        const roundCompleted = answeredFlags.every(isAnswered);
+        console.log(roundCompleted);
+        if (roundCompleted) {
+            setIsRunning(false);
+            setPlayerWon(true);
+        }
+        return roundCompleted;
+    }
+
     async function handleTagSubmission(e) {
         e.preventDefault();
+        console.log(riddles[selectedRiddle]);
         if (validateTag()) {
-            setIsRunning(false);
+            const updatedRiddles = {
+                ...riddles,
+                [selectedRiddle]: {
+                    ...riddles[selectedRiddle],
+                    answered: true,
+                },
+            };
+            setRiddles(updatedRiddles);
             setPlayerCorrect(true);
-            setPlayerWrong(false);
+            const check = checkRoundCompleted(updatedRiddles);
+            console.log("round won:", check);
             toggleTagging();
             return;
         }
-        setPlayerWrong(true);
+        setPlayerCorrect(false);
         toggleTagging();
         return;
     }
@@ -152,10 +178,7 @@ function PhotoViewer() {
                         onClick={tagTarget}
                         ref={imageRef}
                     />
-                    <Timer
-                        isRunning={isRunning}
-                        playerCorrect={playerCorrect}
-                    />
+                    <Timer isRunning={isRunning} playerWon={playerWon} />
 
                     {Object.keys(riddles).map((riddle) => {
                         return (
@@ -168,14 +191,18 @@ function PhotoViewer() {
                                             ? "1px solid blue"
                                             : "none",
                                 }}
-                                onClick={selectRiddle}
+                                onClick={
+                                    riddles[riddle].answered
+                                        ? null
+                                        : selectRiddle
+                                }
                             >
                                 {riddles[riddle].question}
                             </p>
                         );
                     })}
 
-                    {playerWrong && (
+                    {!playerCorrect && (
                         <div>
                             sorry, you got it wrong, but keep going, time is
                             ticking!

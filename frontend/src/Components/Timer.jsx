@@ -15,7 +15,7 @@ function formattedTime(timeMS) {
     return displayTime;
 }
 
-function Timer({ isRunning, playerCorrect }) {
+function Timer({ isRunning, playerWon }) {
     const [time, setTime] = useState(0);
     const [successTime, setSuccessTime] = useState(0);
 
@@ -47,14 +47,14 @@ function Timer({ isRunning, playerCorrect }) {
             await apiStopTimer();
             setSuccessTime(time);
         }
-        if (playerCorrect) stopRound();
-    }, [time, playerCorrect]);
+        if (playerWon) stopRound();
+    }, [time, playerWon]);
 
 
     return (
         <>
             {isRunning && <div>{formattedTime(time)}</div>}
-            {playerCorrect && (
+            {playerWon && (
                 <div>you got it right in {formattedTime(successTime)}!</div>
             )}
         </>
@@ -63,7 +63,7 @@ function Timer({ isRunning, playerCorrect }) {
 
 Timer.propTypes = {
     isRunning: PropTypes.bool,
-    playerCorrect: PropTypes.bool,
+    playerWon: PropTypes.bool,
 };
 
 export default Timer;
