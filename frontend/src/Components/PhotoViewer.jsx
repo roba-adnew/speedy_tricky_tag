@@ -7,29 +7,34 @@ import Timer from "./Timer";
 import "../Styles/PhotoViewer.css";
 
 function PhotoViewer() {
-    const [image, setImage] = useState(null);
-    const [targets, setTargets] = useState(null);
-    const [numRiddles, setNumRiddles] = useState(0);
-    const [numCorrect, setNumCorrect] = useState(0);
-    const [isLoading, setIsLoading] = useState(false);
-    const [gameHasStarted, setGameHasStarted] = useState(false);
-    const [isRunning, setIsRunning] = useState(false);
-    const [isTagging, setIsTagging] = useState(false);
     const [playerCorrect, setPlayerCorrect] = useState(false);
     const [playerWrong, setPlayerWrong] = useState(false);
+    const [gameHasStarted, setGameHasStarted] = useState(false);
+    const [isRunning, setIsRunning] = useState(false);
+
+    const [selectedRiddle, setSelectedRiddle] = useState(null);
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [image, setImage] = useState(null);
+    const [riddles, setRiddles] = useState(null);
+    const [targets, setTargets] = useState(null);
+    const [isTagging, setIsTagging] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
     const imageRef = useRef(null);
 
     useEffect(() => {
         async function getFile() {
             const fileObject = await apiGetImage("intersection.jpg");
-            setImage(fileObject);
+            const imageFile = fileObject.content;
+            setImage(imageFile);
+
+            const imageRiddles = fileObject.details;
+            Object.keys(imageRiddles).forEach((key) => (imageRiddles[key].answered = false));
+
+            setRiddles(fileObject.details);
 
             const defaultRiddleTargets = fileObject.details.riddle1.targets;
             setTargets(defaultRiddleTargets);
-
-            const riddleCount = Object.keys(fileObject.details).length;
-            setNumRiddles(riddleCount);
 
             setIsLoading(false);
             await apiStartTimer();
@@ -113,9 +118,7 @@ function PhotoViewer() {
 
     async function handleTagSubmission(e) {
         e.preventDefault();
-        console.log("tag submitted");
         if (validateTag()) {
-            setNumCorrect((numCorrect) => numCorrect++);
             setIsRunning(false);
             setPlayerCorrect(true);
             setPlayerWrong(false);
@@ -127,7 +130,12 @@ function PhotoViewer() {
         return;
     }
 
-    if (gameHasStarted && numCorrect === numRiddles) console.log("YOU WIN!");
+    function selectRiddle(e) {
+        const selectedRiddle = e.target.id;
+        console.log(selectedRiddle);
+        setTargets(riddles[selectedRiddle].targets);
+        setSelectedRiddle(selectedRiddle);
+    }
 
     return (
         <div style={{ position: "relative" }}>
@@ -139,7 +147,7 @@ function PhotoViewer() {
                 <>
                     <img
                         className="photo"
-                        src={image.content}
+                        src={image}
                         alt="Intersection"
                         onClick={tagTarget}
                         ref={imageRef}
@@ -149,16 +157,20 @@ function PhotoViewer() {
                         playerCorrect={playerCorrect}
                     />
 
-                    {Object.keys(image.details).map((riddle) => {
-                        const currentRiddle = image.details[riddle];
+                    {Object.keys(riddles).map((riddle) => {
                         return (
                             <p
-                                key={currentRiddle.answer}
-                                onClick={() =>
-                                    setTargets(currentRiddle.targets)
-                                }
+                                key={riddle}
+                                id={riddle}
+                                style={{
+                                    border:
+                                        selectedRiddle === riddle
+                                            ? "1px solid blue"
+                                            : "none",
+                                }}
+                                onClick={selectRiddle}
                             >
-                                {image.details[riddle].question}
+                                {riddles[riddle].question}
                             </p>
                         );
                     })}

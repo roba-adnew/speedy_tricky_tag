@@ -50,7 +50,6 @@ function Timer({ isRunning, playerCorrect }) {
         if (playerCorrect) stopRound();
     }, [time, playerCorrect]);
 
-    console.log('running flag:', isRunning)
 
     return (
         <>
