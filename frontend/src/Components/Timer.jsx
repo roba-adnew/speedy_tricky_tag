@@ -8,8 +8,8 @@ function formattedTime(timeMS) {
     const minutes = Math.floor(totalSeconds / 60);
     const displayMinutes = `${minutes.toString().padStart(2, "0")}`;
 
-    const seconds = (totalSeconds % 60).toFixed(1);
-    const displaySeconds = `${seconds.toString().padStart(4, "0")}`;
+    const seconds = Math.floor(totalSeconds % 60);
+    const displaySeconds = `${seconds.toString().padStart(2, "0")}`;
 
     const displayTime = `${displayMinutes}:${displaySeconds}`;
     return displayTime;
@@ -32,7 +32,7 @@ function Timer({ isRunning, playerWon }) {
         let interval;
         if (isRunning) {
             fetchTime();
-            interval = setInterval(fetchTime, 100);
+            interval = setInterval(fetchTime, 500);
         }
 
         return async () => {
@@ -50,12 +50,13 @@ function Timer({ isRunning, playerWon }) {
         if (playerWon) stopRound();
     }, [time, playerWon]);
 
-
     return (
         <>
             {isRunning && <div>{formattedTime(time)}</div>}
             {playerWon && (
-                <div>you got it right in {formattedTime(successTime)}!</div>
+                <div>
+                    You got them all right in {formattedTime(successTime)}!
+                </div>
             )}
         </>
     );

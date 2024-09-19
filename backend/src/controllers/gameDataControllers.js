@@ -82,13 +82,13 @@ exports.startTimer = async (req, res, next) => {
     const timerData = { signal: null, time: 0 };
 
     const interval = setInterval(() => {
-        timerData.time += 80;
+        timerData.time += 250;
 
         if (timerData.signal === "stop") {
             clearInterval(interval);
             userTimers.delete(sessionID);
         }
-    }, 80);
+    }, 250);
 
     userTimers.set(sessionID, timerData);
     return res.status(200).json({ message: "timer set-up" });
