@@ -11,6 +11,11 @@ const { PrismaClient } = require("@prisma/client");
 // add in routers
 const gameDataRouter = require("./src/routes/gameDataRouter");
 
+const allowedOrigins = [
+    "https://speedy-tricky-tag.vercel.app",
+    "http://localhost:4000",
+];
+
 const prisma = new PrismaClient();
 const prismaSession = new PrismaSessionStore(prisma, {
     checkPeriod: 2 * 60 * 1000, // 2 hours in ms
@@ -22,8 +27,18 @@ const app = express();
 app.use(express.json());
 app.use(
     cors({
-        origin: "*",
+        origin: function (origin, callback) {
+            if (!origin) return callback(null, true);
+            if (allowedOrigins.indexOf(origin) === -1) {
+                var msg =
+                    "The CORS policy for this site does not allow access from the specified Origin.";
+                return callback(new Error(msg), false);
+            }
+            return callback(null, true);
+        },
         credentials: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
     })
 );
 app.use(
@@ -36,7 +51,7 @@ app.use(
         },
         secret: process.env.SESSION_SECRET,
         resave: false, // only resave on change
-        saveUninitialized: true, // save without being initialized since there is no auth 
+        saveUninitialized: true, // save without being initialized since there is no auth
         store: prismaSession,
     })
 );

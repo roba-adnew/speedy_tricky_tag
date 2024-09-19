@@ -2,14 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import {
     getImageDetails as apiGetImage,
     startTimer as apiStartTimer,
-    stopTimer as apiStopTimer,
-    getTime as apiGetTime,
 } from "../utils/api";
+import Timer from "./Timer";
 import "../Styles/PhotoViewer.css";
 
 function PhotoViewer() {
-    const [time, setTime] = useState(0);
-    const [successTime, setSuccessTime] = useState(0);
     const [image, setImage] = useState(null);
     const [targets, setTargets] = useState(null);
     const [numRiddles, setNumRiddles] = useState(0);
@@ -40,29 +37,6 @@ function PhotoViewer() {
         }
         if (gameHasStarted) getFile();
     }, [gameHasStarted]);
-
-    useEffect(() => {
-        async function fetchTime() {
-            try {
-                const time = await apiGetTime();
-                setTime(time);
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        let interval;
-        if (isRunning) {
-            fetchTime();
-            interval = setInterval(fetchTime, 100);
-        }
-
-        return async () => {
-            if (!isRunning) {
-                clearInterval(interval);
-            }
-        };
-    }, [isRunning]);
 
     let scaledTargets;
     if (imageRef?.current && targets) {
@@ -104,19 +78,6 @@ function PhotoViewer() {
     //     ],
     // ];
 
-    function formattedTime(timeMS) {
-        const totalSeconds = timeMS / 1000; // time in API in MS;
-
-        const minutes = Math.floor(totalSeconds / 60);
-        const displayMinutes = `${minutes.toString().padStart(2, "0")}`;
-
-        const seconds = (totalSeconds % 60).toFixed(1);
-        const displaySeconds = `${seconds.toString().padStart(4, "0")}`;
-
-        const displayTime = `${displayMinutes}:${displaySeconds}`;
-        return displayTime;
-    }
-
     function toggleTagging() {
         setIsTagging(!isTagging);
     }
@@ -154,8 +115,6 @@ function PhotoViewer() {
         e.preventDefault();
         console.log("tag submitted");
         if (validateTag()) {
-            await apiStopTimer();
-            setSuccessTime(time);
             setNumCorrect((numCorrect) => numCorrect++);
             setIsRunning(false);
             setPlayerCorrect(true);
@@ -168,7 +127,7 @@ function PhotoViewer() {
         return;
     }
 
-    if (numCorrect === numRiddles) console.log("YOU WIN!");
+    if (gameHasStarted && numCorrect === numRiddles) console.log("YOU WIN!");
 
     return (
         <div style={{ position: "relative" }}>
@@ -185,8 +144,11 @@ function PhotoViewer() {
                         onClick={tagTarget}
                         ref={imageRef}
                     />
-                    {isRunning && <div>{formattedTime(time)}</div>}
-                    {playerCorrect && <div>{formattedTime(successTime)}</div>}
+                    <Timer
+                        isRunning={isRunning}
+                        playerCorrect={playerCorrect}
+                    />
+
                     {Object.keys(image.details).map((riddle) => {
                         const currentRiddle = image.details[riddle];
                         return (
@@ -200,11 +162,7 @@ function PhotoViewer() {
                             </p>
                         );
                     })}
-                    {playerCorrect && (
-                        <div>
-                            you got it right in {formattedTime(successTime)}!
-                        </div>
-                    )}
+
                     {playerWrong && (
                         <div>
                             sorry, you got it wrong, but keep going, time is
