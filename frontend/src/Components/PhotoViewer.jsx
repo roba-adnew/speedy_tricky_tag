@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import {
     getImageSetMeta as apiGetImageSetMeta,
     getImageDetails as apiGetImage,
@@ -8,27 +9,24 @@ import Timer from "./Timer";
 import "../Styles/PhotoViewer.css";
 
 function PhotoViewer() {
-    const [imageIds, setImageIds] = useState(null);
     const [playerCorrect, setPlayerCorrect] = useState(false);
     const [playerWon, setPlayerWon] = useState(false);
-    const [gameHasStarted, setGameHasStarted] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
 
     const [selectedRiddle, setSelectedRiddle] = useState(null);
 
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [image, setImage] = useState(null);
     const [riddles, setRiddles] = useState(null);
     const [targets, setTargets] = useState(null);
     const [isTagging, setIsTagging] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
     const imageRef = useRef(null);
+    const location = useLocation();
+    const imageIds = location.state?.imageIds;
 
     useEffect(() => {
         async function getFile() {
-            const imageSet = await apiGetImageSetMeta();
-            setImageIds(imageSet);
-            console.log(imageSet);
             const fileObject = await apiGetImage("intersection.jpg");
             const imageFile = fileObject.content;
             setImage(imageFile);
@@ -47,8 +45,8 @@ function PhotoViewer() {
             await apiStartTimer();
             setIsRunning(true);
         }
-        if (gameHasStarted) getFile();
-    }, [gameHasStarted]);
+        getFile();
+    }, []);
 
     let scaledTargets;
     if (imageRef?.current && targets) {
@@ -62,19 +60,15 @@ function PhotoViewer() {
         );
     }
 
-    async function startGame() {
-        setIsLoading(true);
-        setGameHasStarted(true);
-    }
-
     if (isLoading) {
         return <div>getting the game ready!</div>;
     }
 
-    if (gameHasStarted && !isLoading && !image) {
+    if (!isLoading && !image) {
         return <div>No file data available</div>;
     }
 
+    if (imageIds) console.log(imageIds);
     // const targetOrig = [
     //     [
     //         { x: 1094, y: 1231 },
@@ -170,69 +164,56 @@ function PhotoViewer() {
 
     return (
         <div style={{ position: "relative" }}>
-            {!gameHasStarted ? (
-                <button type="button" onClick={startGame}>
-                    start game
-                </button>
-            ) : (
-                <>
-                    <img
-                        className="photo"
-                        src={image}
-                        alt="Intersection"
-                        onClick={tagTarget}
-                        ref={imageRef}
-                    />
-                    <Timer isRunning={isRunning} playerWon={playerWon} />
+            <img
+                className="photo"
+                src={image}
+                alt="Intersection"
+                onClick={tagTarget}
+                ref={imageRef}
+            />
+            <Timer isRunning={isRunning} playerWon={playerWon} />
 
-                    {Object.keys(riddles).map((riddle) => {
-                        return (
-                            <p
-                                key={riddle}
-                                id={riddle}
-                                style={{
-                                    border:
-                                        selectedRiddle === riddle
-                                            ? "1px solid blue"
-                                            : "none",
-                                }}
-                                onClick={
-                                    riddles[riddle].answered
-                                        ? null
-                                        : selectRiddle
-                                }
-                            >
-                                {riddles[riddle].question}
-                            </p>
-                        );
-                    })}
+            {Object.keys(riddles).map((riddle) => {
+                return (
+                    <p
+                        key={riddle}
+                        id={riddle}
+                        style={{
+                            border:
+                                selectedRiddle === riddle
+                                    ? "1px solid blue"
+                                    : "none",
+                        }}
+                        onClick={riddles[riddle].answered ? null : selectRiddle}
+                    >
+                        {riddles[riddle].question}
+                    </p>
+                );
+            })}
 
-                    {!playerCorrect && (
-                        <div>
-                            sorry, you got it wrong, but keep going, time is
-                            ticking!
-                        </div>
-                    )}
-                    {isTagging && (
-                        <form
-                            onSubmit={handleTagSubmission}
-                            style={{
-                                position: "absolute",
-                                left: `${tag.x}px`,
-                                top: `${tag.y}px`,
-                                transform: "translate(-10%, -10%)",
-                                zIndex: 1000,
-                            }}
-                        >
-                            <button type="submit">
-                                that&apos;s it, tag it! TAG IT NOW!
-                            </button>
-                            <button onClick={toggleTagging} type="button">
-                                ehh, nevermind
-                            </button>
-                        </form>
-                    )}
-                </>
+            {!playerCorrect && (
+                <div>
+                    sorry, you got it wrong, but keep going, time is ticking!
+                </div>
+            )}
+            {isTagging && (
+                <form
+                    onSubmit={handleTagSubmission}
+                    style={{
+                        position: "absolute",
+                        left: `${tag.x}px`,
+                        top: `${tag.y}px`,
+                        transform: "translate(-10%, -10%)",
+                        zIndex: 1000,
+                    }}
+                >
+                    <button type="submit">
+                        that&apos;s it, tag it! TAG IT NOW!
+                    </button>
+                    <button onClick={toggleTagging} type="button">
+                        ehh, nevermind
+                    </button>
+                </form>
             )}
         </div>
     );

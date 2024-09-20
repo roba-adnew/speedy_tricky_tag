@@ -1,6 +1,7 @@
-import PhotoViewer from "./Components/PhotoViewer";
+import { Outlet } from "react-router-dom";
+
 function App() {
-    return <PhotoViewer />;
+    return <Outlet />;
 }
 
 export default App;
