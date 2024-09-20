@@ -1,6 +1,6 @@
 import App from "../App";
 import StartAndInstructions from "../Components/StartAndInstructions";
-import PhotoViewer from "../Components/PhotoViewer";
+import ImageViewer from "../Components/ImageViewer";
 
 const routes = [
     {
@@ -13,7 +13,7 @@ const routes = [
             },
             {
                 path: "/game",
-                element: <PhotoViewer />,
+                element: <ImageViewer />,
             },
         ],
     },

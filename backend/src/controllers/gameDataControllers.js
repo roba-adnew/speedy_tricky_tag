@@ -22,16 +22,25 @@ exports.getImageIds = async (req, res, next) => {
 };
 
 exports.downloadImage = async (req, res, next) => {
-    debug("image request body: %O", req.body);
-    const { name } = req.body;
+    debug("image request body: %O", req.body.imageId);
+    const { imageId } = req.body;
 
-    if (!name) {
+    if (!imageId) {
         return res.status(400).json({ error: "Image name is required" });
     }
     try {
+        const results = await prisma.image.findFirst({
+            where: { id: imageId },
+            select: {
+                name: true,
+            },
+        });
+
+        debug("queried name:", results.name);
+
         const { data, error } = await supabase.storage
             .from("images")
-            .download(`public/${name}`);
+            .download(`public/${results.name}`);
 
         if (error) {
             debug("Error downloading from Supabase:", error);
@@ -45,7 +54,10 @@ exports.downloadImage = async (req, res, next) => {
         debug("type:", data.type);
 
         res.setHeader("Content-Type", data.type);
-        res.setHeader("Content-Disposition", `inline; filename="${name}"`);
+        res.setHeader(
+            "Content-Disposition",
+            `inline; filename="${results.name}"`
+        );
 
         return res.send(fileBuffer);
     } catch (err) {
@@ -55,15 +67,15 @@ exports.downloadImage = async (req, res, next) => {
 
 exports.getImageMeta = async (req, res, next) => {
     debug("image request body: %O", req.body);
-    const { name } = req.body;
+    const { imageId } = req.body;
 
-    if (!name) {
+    if (!imageId) {
         return res.status(400).json({ error: "Image name is required" });
     }
 
     try {
         const imageMeta = await prisma.image.findFirst({
-            where: { name: name },
+            where: { id: imageId.id },
             select: {
                 riddle1: true,
                 riddle2: true,

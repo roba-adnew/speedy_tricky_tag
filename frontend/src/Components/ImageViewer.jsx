@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import {
-    getImageSetMeta as apiGetImageSetMeta,
     getImageDetails as apiGetImage,
     startTimer as apiStartTimer,
 } from "../utils/api";
 import Timer from "./Timer";
-import "../Styles/PhotoViewer.css";
+import "../Styles/ImageViewer.css";
 
-function PhotoViewer() {
+function ImageViewer() {
+    const [imageIdsIndex, setImageIdIndex] = useState(0);
+
     const [playerCorrect, setPlayerCorrect] = useState(false);
     const [playerWon, setPlayerWon] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
@@ -25,9 +26,11 @@ function PhotoViewer() {
     const location = useLocation();
     const imageIds = location.state?.imageIds;
 
+    useEffect(() => {});
+
     useEffect(() => {
         async function getFile() {
-            const fileObject = await apiGetImage("intersection.jpg");
+            const fileObject = await apiGetImage(imageIds[imageIdsIndex]);
             const imageFile = fileObject.content;
             setImage(imageFile);
 
@@ -46,7 +49,7 @@ function PhotoViewer() {
             setIsRunning(true);
         }
         getFile();
-    }, []);
+    }, [imageIds, imageIdsIndex]);
 
     let scaledTargets;
     if (imageRef?.current && targets) {
@@ -128,6 +131,7 @@ function PhotoViewer() {
         if (roundCompleted) {
             setIsRunning(false);
             setPlayerWon(true);
+            setImageIdIndex((prevIndex) => prevIndex++);
         }
         return roundCompleted;
     }
@@ -219,4 +223,4 @@ function PhotoViewer() {
     );
 }
 
-export default PhotoViewer;
+export default ImageViewer;

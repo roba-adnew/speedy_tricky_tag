@@ -21,7 +21,7 @@ async function getImageSetMeta() {
     }
 }
 
-async function getImageDetails(fileName) {
+async function getImageDetails(imageId) {
     const download_url = `${base_url}/download`;
     const details_url = `${base_url}/meta`;
 
@@ -29,7 +29,7 @@ async function getImageDetails(fileName) {
         method: "POST",
         credentials: "include",
         headers: { "Content-type": "application/json" },
-        body: JSON.stringify({ name: fileName }),
+        body: JSON.stringify({ imageId: imageId.id }),
     };
     try {
         const downloadResponse = await fetch(download_url, options);
