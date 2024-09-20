@@ -8,6 +8,11 @@ router.post("/download", gameDataController.downloadImage);
 
 router.post("/meta", gameDataController.getImageMeta);
 
+router.post(
+    "/viewport-meta-receiver",
+    gameDataController.receiveViewportDetails
+);
+
 router.post("/start-timer", gameDataController.startTimer);
 
 router.post("/stop-timer", gameDataController.stopTimer);

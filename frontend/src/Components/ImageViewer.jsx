@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import {
     getImageDetails as apiGetImage,
     startTimer as apiStartTimer,
+    sendViewportDetails as apiSendViewportDetails,
 } from "../utils/api";
 import Timer from "./Timer";
 import "../Styles/ImageViewer.css";
@@ -51,6 +52,20 @@ function ImageViewer() {
         getFile();
     }, [imageIds, imageIdsIndex]);
 
+    useEffect(() => {
+        async function sendViewportDetails() {
+            if (!imageRef?.current) return;
+            const scalingFactor =
+                imageRef.current.height / imageRef.current.naturalHeight;
+            const xOffset = imageRef.current.x;
+            const yOffset = imageRef.current.y;
+            const viewportDetails = { scalingFactor, xOffset, yOffset };
+            console.log("viewport details:", viewportDetails);
+            await apiSendViewportDetails(viewportDetails);
+        }
+        sendViewportDetails();
+    }, [image]);
+
     let scaledTargets;
     if (imageRef?.current && targets) {
         const scalingFactor =
@@ -71,7 +86,6 @@ function ImageViewer() {
         return <div>No file data available</div>;
     }
 
-    if (imageIds) console.log(imageIds);
     // const targetOrig = [
     //     [
     //         { x: 1094, y: 1231 },

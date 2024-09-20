@@ -51,6 +51,24 @@ async function getImageDetails(imageId) {
     }
 }
 
+async function sendViewportDetails(viewportDetails) {
+    const url = `${base_url}/viewport-meta-receiver`;
+
+    const options = {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify({ viewportDetails }),
+    };
+    try {
+        const response = await fetch(url, options);
+        return response;
+    } catch (err) {
+        console.error("error sending viewport details:", err);
+        throw err;
+    }
+}
+
 async function startTimer() {
     const url = `${base_url}/start-timer`;
 
@@ -107,4 +125,11 @@ async function getTime() {
     }
 }
 
-export { getImageSetMeta, getImageDetails, startTimer, getTime, stopTimer };
+export {
+    getImageSetMeta,
+    getImageDetails,
+    sendViewportDetails,
+    startTimer,
+    getTime,
+    stopTimer,
+};

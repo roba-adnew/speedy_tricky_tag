@@ -5,7 +5,11 @@ const { createClient } = require("@supabase/supabase-js");
 
 const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
+
 const userTimers = new Map();
+const targets = {};
+const scaledTargets = {};
+let viewportDetails;
 
 exports.getImageIds = async (req, res, next) => {
     try {
@@ -86,16 +90,35 @@ exports.getImageMeta = async (req, res, next) => {
                 riddle7: true,
             },
         });
-        debug("prisma results:", imageMeta);
 
-        return res.json(imageMeta);
+        const riddleQuestions = {};
+        for (let riddle in imageMeta) {
+            riddleQuestions[riddle] = { question: imageMeta[riddle].question };
+        }
+
+        for (let riddle in imageMeta) {
+            targets[riddle] = { targets: imageMeta[riddle].targets };
+        }
+
+        return res.json(riddleQuestions);
     } catch (err) {
         debug("unexpected error", err);
     }
 };
 
+exports.receiveViewportDetails = (req, res, next) => {
+    viewportDetails = req.body.viewportDetails;
+    debug("viewport:", viewportDetails);
+    if (!viewportDetails) {
+        res.status(400).json({ message: "details were not received" });
+    }
+    scaleTargets();
+    debug("scaled targets:", scaledTargets);
+
+    res.status(201);
+};
+
 exports.startTimer = async (req, res, next) => {
-    debug("image request body: %O", req.body);
     const sessionID = req.sessionID;
     debug("starter sessionId:", sessionID);
 
@@ -145,7 +168,39 @@ exports.getTime = (req, res, next) => {
             .json({ message: "No timer running for this session" });
     }
     const timerData = userTimers.get(sessionID);
-    debug("time: ", timerData.time);
-
     res.json({ time: timerData.time });
 };
+
+function scaleTargets() {
+    const { scalingFactor, xOffset, yOffset } = viewportDetails;
+    const targetsKeys = Object.keys(targets);
+    targetsKeys.forEach((riddle) => {
+        debug("target example:", targets[riddle].targets);
+        scaledTargets[riddle] = targets[riddle].targets.map((target) =>
+            target.map((coord) => ({
+                x: scalingFactor * (coord.x + xOffset),
+                y: scalingFactor * (coord.y + yOffset),
+            }))
+        );
+    });
+}
+
+function validateTag(target) {
+    let isInside = false;
+    for (let target of scaledTargets) {
+        const numEdges = target.length;
+        for (let i = 0, j = numEdges - 1; i < numEdges; j = i, i++) {
+            const yIsBounded = tag.y < target[i].y !== tag.y < target[j].y;
+            const xIsBounded =
+                tag.x <
+                target[i].x +
+                    ((tag.y - target[i].y) / (target[j].y - target[i].y)) *
+                        (target[j].x - target[i].x);
+
+            const castIntersects = yIsBounded && xIsBounded;
+            if (castIntersects) isInside = !isInside;
+        }
+    }
+
+    return isInside;
+}
