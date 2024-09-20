@@ -7,6 +7,20 @@ const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 const userTimers = new Map();
 
+exports.getImageIds = async (req, res, next) => {
+    try {
+        const imageIds = await prisma.image.findMany({
+            select: {
+                id: true,
+            },
+        });
+
+        return res.status(200).json({ imageIds });
+    } catch (err) {
+        debug("unexpected error getting imageIds", err);
+    }
+};
+
 exports.downloadImage = async (req, res, next) => {
     debug("image request body: %O", req.body);
     const { name } = req.body;
@@ -35,7 +49,7 @@ exports.downloadImage = async (req, res, next) => {
 
         return res.send(fileBuffer);
     } catch (err) {
-        debug("unexpected error", err);
+        debug("unexpected error getting image", err);
     }
 };
 
@@ -58,7 +72,7 @@ exports.getImageMeta = async (req, res, next) => {
                 riddle5: true,
                 riddle6: true,
                 riddle7: true,
-            }
+            },
         });
         debug("prisma results:", imageMeta);
 
@@ -119,7 +133,7 @@ exports.getTime = (req, res, next) => {
             .json({ message: "No timer running for this session" });
     }
     const timerData = userTimers.get(sessionID);
-    debug('time: ', timerData.time)
+    debug("time: ", timerData.time);
 
     res.json({ time: timerData.time });
 };

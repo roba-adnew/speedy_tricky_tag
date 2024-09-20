@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import {
+    getImageSetMeta as apiGetImageSetMeta,
     getImageDetails as apiGetImage,
     startTimer as apiStartTimer,
 } from "../utils/api";
@@ -7,6 +8,7 @@ import Timer from "./Timer";
 import "../Styles/PhotoViewer.css";
 
 function PhotoViewer() {
+    const [imageIds, setImageIds] = useState(null);
     const [playerCorrect, setPlayerCorrect] = useState(false);
     const [playerWon, setPlayerWon] = useState(false);
     const [gameHasStarted, setGameHasStarted] = useState(false);
@@ -24,6 +26,9 @@ function PhotoViewer() {
 
     useEffect(() => {
         async function getFile() {
+            const imageSet = await apiGetImageSetMeta();
+            setImageIds(imageSet);
+            console.log(imageSet);
             const fileObject = await apiGetImage("intersection.jpg");
             const imageFile = fileObject.content;
             setImage(imageFile);
