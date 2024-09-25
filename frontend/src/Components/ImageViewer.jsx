@@ -111,7 +111,7 @@ function ImageViewer() {
             if (results.roundCompleted) {
                 setIsRunning(false);
                 setPlayerWon(true);
-                setImageIdIndex((prevIndex) => prevIndex++);
+                setImageIdIndex((prevIndex) => prevIndex + 1);
             }
             toggleTagging();
             return;
