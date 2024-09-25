@@ -19,4 +19,6 @@ router.post("/stop-timer", gameDataController.stopTimer);
 
 router.post("/get-time", gameDataController.getTime);
 
+router.post("/check-tag", gameDataController.checkTag);
+
 module.exports = router;

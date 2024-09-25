@@ -4,6 +4,7 @@ import {
     getImageDetails as apiGetImage,
     startTimer as apiStartTimer,
     sendViewportDetails as apiSendViewportDetails,
+    checkTag as apiCheckTag
 } from "../utils/api";
 import Timer from "./Timer";
 import "../Styles/ImageViewer.css";
@@ -153,7 +154,11 @@ function ImageViewer() {
     async function handleTagSubmission(e) {
         e.preventDefault();
         console.log(riddles[selectedRiddle]);
-        if (validateTag()) {
+        console.log('selected riddle at tag:', selectedRiddle),
+        console.log('tag at validation', tag);
+        const correct = await apiCheckTag(selectedRiddle, tag)
+        console.log('correctness:', correct)
+        if (correct) {
             const updatedRiddles = {
                 ...riddles,
                 [selectedRiddle]: {

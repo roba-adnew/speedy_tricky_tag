@@ -125,6 +125,28 @@ async function getTime() {
     }
 }
 
+async function checkTag(riddle, tag) {
+    const url = `${base_url}/check-tag`;
+    const body = { riddle: riddle, tag: tag };
+    console.log('req body to send', body)
+
+    const options = {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify(body),
+    };
+
+    try {
+        const response = await fetch(url, options);
+        const results = await response.json();
+        return results.correct;
+    } catch (err) {
+        console.error("tag check error:", err);
+        throw err;
+    }
+}
+
 export {
     getImageSetMeta,
     getImageDetails,
@@ -132,4 +154,5 @@ export {
     startTimer,
     getTime,
     stopTimer,
+    checkTag,
 };

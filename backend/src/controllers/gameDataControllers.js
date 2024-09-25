@@ -7,8 +7,7 @@ const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 
 const userTimers = new Map();
-const targets = {};
-const scaledTargets = {};
+const riddles = {};
 let viewportDetails;
 
 exports.getImageIds = async (req, res, next) => {
@@ -90,17 +89,22 @@ exports.getImageMeta = async (req, res, next) => {
                 riddle7: true,
             },
         });
-
-        const riddleQuestions = {};
-        for (let riddle in imageMeta) {
-            riddleQuestions[riddle] = { question: imageMeta[riddle].question };
-        }
+        const clientRiddles = {}
 
         for (let riddle in imageMeta) {
-            targets[riddle] = { targets: imageMeta[riddle].targets };
+            riddles[riddle] = {
+                question: imageMeta[riddle].question,
+                targets: imageMeta[riddle].targets,
+                answered: false,
+            };
+
+            clientRiddles[riddle] = {
+                question: imageMeta[riddle].question,
+                answered: false,
+            }
         }
 
-        return res.json(riddleQuestions);
+        return res.json(clientRiddles);
     } catch (err) {
         debug("unexpected error", err);
     }
@@ -113,8 +117,6 @@ exports.receiveViewportDetails = (req, res, next) => {
         res.status(400).json({ message: "details were not received" });
     }
     scaleTargets();
-    debug("scaled targets:", scaledTargets);
-
     res.status(201);
 };
 
@@ -171,23 +173,32 @@ exports.getTime = (req, res, next) => {
     res.json({ time: timerData.time });
 };
 
+exports.checkTag = (req, res, next) => {
+    const { riddle, tag } = req.body;
+    const success = validateTag(riddle, tag);
+    if (success) return res.status(200).json({ correct: true });
+    if (!success) return res.status(200).json({ correct: false });
+};
+
 function scaleTargets() {
     const { scalingFactor, xOffset, yOffset } = viewportDetails;
-    const targetsKeys = Object.keys(targets);
-    targetsKeys.forEach((riddle) => {
-        debug("target example:", targets[riddle].targets);
-        scaledTargets[riddle] = targets[riddle].targets.map((target) =>
-            target.map((coord) => ({
-                x: scalingFactor * (coord.x + xOffset),
-                y: scalingFactor * (coord.y + yOffset),
-            }))
+    const riddleKeys = Object.keys(riddles);
+    riddleKeys.forEach((riddle) => {
+        riddles[riddle].scaledTargets = riddles[riddle].targets.map(
+            (target) =>
+                target.map((coord) => ({
+                    x: scalingFactor * (coord.x + xOffset),
+                    y: scalingFactor * (coord.y + yOffset),
+                }))
         );
     });
 }
 
-function validateTag(target) {
+function validateTag(riddle, tag) {
+    debug("riddle and tag mid validation:", riddle, tag)
     let isInside = false;
-    for (let target of scaledTargets) {
+    const riddleTargets = riddles[riddle].scaledTargets;
+    for (let target of riddleTargets) {
         const numEdges = target.length;
         for (let i = 0, j = numEdges - 1; i < numEdges; j = i, i++) {
             const yIsBounded = tag.y < target[i].y !== tag.y < target[j].y;
@@ -201,6 +212,6 @@ function validateTag(target) {
             if (castIntersects) isInside = !isInside;
         }
     }
-
+    debug("tag validity:", isInside);
     return isInside;
 }
