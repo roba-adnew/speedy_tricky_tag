@@ -159,10 +159,11 @@ function ImageViewer() {
                         key={riddle}
                         id={riddle}
                         style={{
-                            border:
-                                selectedRiddle === riddle
-                                    ? "1px solid blue"
-                                    : "none",
+                            border: riddles[riddle]?.answered
+                                ? "1px solid green"
+                                : selectedRiddle === riddle
+                                ? "1px solid blue"
+                                : "none",
                         }}
                         onClick={riddles[riddle].answered ? null : selectRiddle}
                     >
