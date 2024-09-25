@@ -89,7 +89,7 @@ exports.getImageMeta = async (req, res, next) => {
                 riddle7: true,
             },
         });
-        const clientRiddles = {}
+        const clientRiddles = {};
 
         for (let riddle in imageMeta) {
             riddles[riddle] = {
@@ -101,7 +101,7 @@ exports.getImageMeta = async (req, res, next) => {
             clientRiddles[riddle] = {
                 question: imageMeta[riddle].question,
                 answered: false,
-            }
+            };
         }
 
         return res.json(clientRiddles);
@@ -175,27 +175,29 @@ exports.getTime = (req, res, next) => {
 
 exports.checkTag = (req, res, next) => {
     const { riddle, tag } = req.body;
-    const success = validateTag(riddle, tag);
-    if (success) return res.status(200).json({ correct: true });
-    if (!success) return res.status(200).json({ correct: false });
+    const correct = validateTag(riddle, tag);
+    if (correct) riddles[riddle].answered = true;
+    const roundCompleted = checkRoundCompleted();
+    return res
+        .status(200)
+        .json({ correct: correct, roundCompleted: roundCompleted });
 };
 
 function scaleTargets() {
     const { scalingFactor, xOffset, yOffset } = viewportDetails;
     const riddleKeys = Object.keys(riddles);
     riddleKeys.forEach((riddle) => {
-        riddles[riddle].scaledTargets = riddles[riddle].targets.map(
-            (target) =>
-                target.map((coord) => ({
-                    x: scalingFactor * (coord.x + xOffset),
-                    y: scalingFactor * (coord.y + yOffset),
-                }))
+        riddles[riddle].scaledTargets = riddles[riddle].targets.map((target) =>
+            target.map((coord) => ({
+                x: scalingFactor * (coord.x + xOffset),
+                y: scalingFactor * (coord.y + yOffset),
+            }))
         );
     });
 }
 
 function validateTag(riddle, tag) {
-    debug("riddle and tag mid validation:", riddle, tag)
+    debug("riddle and tag mid validation:", riddle, tag);
     let isInside = false;
     const riddleTargets = riddles[riddle].scaledTargets;
     for (let target of riddleTargets) {
@@ -214,4 +216,14 @@ function validateTag(riddle, tag) {
     }
     debug("tag validity:", isInside);
     return isInside;
+}
+
+function checkRoundCompleted() {
+    const isCorrect = (flag) => flag === true;
+    const answeredFlags = Object.keys(riddles).map(
+        (riddle) => riddles[riddle].answered
+    );
+    const roundCompleted = answeredFlags.every(isCorrect);
+    debug('answered flags after checking:', answeredFlags)
+    return roundCompleted;
 }

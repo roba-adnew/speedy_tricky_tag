@@ -140,7 +140,7 @@ async function checkTag(riddle, tag) {
     try {
         const response = await fetch(url, options);
         const results = await response.json();
-        return results.correct;
+        return results;
     } catch (err) {
         console.error("tag check error:", err);
         throw err;

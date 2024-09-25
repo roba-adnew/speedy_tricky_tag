@@ -21,7 +21,6 @@ function ImageViewer() {
     const [isLoading, setIsLoading] = useState(true);
     const [image, setImage] = useState(null);
     const [riddles, setRiddles] = useState(null);
-    const [targets, setTargets] = useState(null);
     const [isTagging, setIsTagging] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
     const imageRef = useRef(null);
@@ -42,9 +41,6 @@ function ImageViewer() {
             );
 
             setRiddles(fileObject.details);
-
-            const defaultRiddleTargets = fileObject.details.riddle1.targets;
-            setTargets(defaultRiddleTargets);
 
             setIsLoading(false);
             await apiStartTimer();
@@ -67,17 +63,7 @@ function ImageViewer() {
         sendViewportDetails();
     }, [image]);
 
-    let scaledTargets;
-    if (imageRef?.current && targets) {
-        const scalingFactor =
-            imageRef.current.height / imageRef.current.naturalHeight;
-        scaledTargets = targets.map((target) =>
-            target.map((coord) => ({
-                x: scalingFactor * (coord.x + imageRef.current.x),
-                y: scalingFactor * (coord.y + imageRef.current.y),
-            }))
-        );
-    }
+
 
     if (isLoading) {
         return <div>getting the game ready!</div>;
@@ -86,21 +72,6 @@ function ImageViewer() {
     if (!isLoading && !image) {
         return <div>No file data available</div>;
     }
-
-    // const targetOrig = [
-    //     [
-    //         { x: 1094, y: 1231 },
-    //         { x: 1076, y: 2024 },
-    //         { x: 2013, y: 1674 },
-    //         { x: 2021, y: 2292 },
-    //     ],
-    //     [
-    //         { x: 2238, y: 1676 },
-    //         { x: 2393, y: 1684 },
-    //         { x: 2232, y: 2525 },
-    //         { x: 2401, y: 2524 },
-    //     ],
-    // ];
 
     function toggleTagging() {
         setIsTagging(!isTagging);
@@ -115,50 +86,16 @@ function ImageViewer() {
         toggleTagging();
     }
 
-    function validateTag() {
-        let isInside = false;
-        for (let target of scaledTargets) {
-            const numEdges = target.length;
-            for (let i = 0, j = numEdges - 1; i < numEdges; j = i, i++) {
-                const yIsBounded = tag.y < target[i].y !== tag.y < target[j].y;
-                const xIsBounded =
-                    tag.x <
-                    target[i].x +
-                        ((tag.y - target[i].y) / (target[j].y - target[i].y)) *
-                            (target[j].x - target[i].x);
 
-                const castIntersects = yIsBounded && xIsBounded;
-                if (castIntersects) isInside = !isInside;
-            }
-        }
-
-        return isInside;
-    }
-
-    function checkRoundCompleted(riddles) {
-        const isAnswered = (flag) => flag === true;
-        const answeredFlags = Object.keys(riddles).map(
-            (riddle) => riddles[riddle].answered
-        );
-        console.log("answers so far:", answeredFlags);
-        const roundCompleted = answeredFlags.every(isAnswered);
-        console.log(roundCompleted);
-        if (roundCompleted) {
-            setIsRunning(false);
-            setPlayerWon(true);
-            setImageIdIndex((prevIndex) => prevIndex++);
-        }
-        return roundCompleted;
-    }
 
     async function handleTagSubmission(e) {
         e.preventDefault();
         console.log(riddles[selectedRiddle]);
         console.log('selected riddle at tag:', selectedRiddle),
         console.log('tag at validation', tag);
-        const correct = await apiCheckTag(selectedRiddle, tag)
-        console.log('correctness:', correct)
-        if (correct) {
+        const results = await apiCheckTag(selectedRiddle, tag)
+        console.log('correctness:', results)
+        if (results.correct) {
             const updatedRiddles = {
                 ...riddles,
                 [selectedRiddle]: {
@@ -168,8 +105,11 @@ function ImageViewer() {
             };
             setRiddles(updatedRiddles);
             setPlayerCorrect(true);
-            const check = checkRoundCompleted(updatedRiddles);
-            console.log("round won:", check);
+            if (results.roundCompleted) {
+                setIsRunning(false);
+                setPlayerWon(true);
+                setImageIdIndex((prevIndex) => prevIndex++);
+            };
             toggleTagging();
             return;
         }
@@ -181,7 +121,6 @@ function ImageViewer() {
     function selectRiddle(e) {
         const selectedRiddle = e.target.id;
         console.log(selectedRiddle);
-        setTargets(riddles[selectedRiddle].targets);
         setSelectedRiddle(selectedRiddle);
     }
 

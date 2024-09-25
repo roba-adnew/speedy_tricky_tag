@@ -14,57 +14,57 @@ if (!process.env.SB_API_URL || !process.env.SB_API_KEY) {
 const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 
-async function clearSupabaseAndPostgres() {
+async function clearPostgres() {
     try {
         const imageDeletion = await prisma.image.deleteMany();
         const scoreboardDeletion = await prisma.score.deleteMany();
-
-        const { data: listData, error: listError } = await supabase.storage
-            .from("images")
-            .list("public");
-
-        if (listError) console.error("supabase listing error", listError);
-
-        let imageList: string[] = [];
-        if (listData) {
-            listData.forEach((image: { name: string }) => {
-                if (image.name !== ".emptyFolderPlaceholder")
-                    imageList.push(image.name);
-            });
-        }
-
-        let deletionData: any[] = [];
-        imageList.forEach(async (image) => {
-            const { data: deleteData, error: deleteError } =
-                await supabase.storage
-                    .from("images")
-                    .remove(imageList.map((image) => `public/${image}`));
-
-            if (deleteError)
-                console.error("supabase deleting error", deleteError);
-        });
 
         console.log(
             "images deleted",
             imageDeletion,
             "scoreboard deleted",
-            scoreboardDeletion,
-            "supabase deletion",
-            deletionData
+            scoreboardDeletion
         );
     } catch (err) {
         console.error(err);
     }
 }
 
+async function clearSupabase() {
+    const { data: listData, error: listError } = await supabase.storage
+        .from("images")
+        .list("public");
+
+    if (listError) console.error("supabase listing error", listError);
+
+    let imageList: string[] = [];
+    if (listData) {
+        listData.forEach((image: { name: string }) => {
+            if (image.name !== ".emptyFolderPlaceholder")
+                imageList.push(image.name);
+        });
+    }
+
+    let deletionData: any[] = [];
+    imageList.forEach(async (image) => {
+        const { data: deleteData, error: deleteError } = await supabase.storage
+            .from("images")
+            .remove(imageList.map((image) => `public/${image}`));
+
+        if (deleteError) console.error("supabase deleting error", deleteError);
+    });
+
+    console.log("supabase deletion", deletionData);
+}
+
 async function selectAll() {
     const images = await prisma.image.findMany();
     const scores = await prisma.score.findMany();
-    console.log("images:", JSON.stringify(images, null, 2));
+    console.log("images:", JSON.stringify(images));
     console.log("scores:", scores);
 }
 
-selectAll()
+clearPostgres()
     .then(async () => {
         await prisma.$disconnect();
     })
