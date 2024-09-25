@@ -4,7 +4,7 @@ import {
     getImageDetails as apiGetImage,
     startTimer as apiStartTimer,
     sendViewportDetails as apiSendViewportDetails,
-    checkTag as apiCheckTag
+    checkTag as apiCheckTag,
 } from "../utils/api";
 import Timer from "./Timer";
 import "../Styles/ImageViewer.css";
@@ -23,6 +23,7 @@ function ImageViewer() {
     const [riddles, setRiddles] = useState(null);
     const [isTagging, setIsTagging] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
+    const [tagFlag, setTagFlag] = useState(false);
     const imageRef = useRef(null);
     const location = useLocation();
     const imageIds = location.state?.imageIds;
@@ -63,8 +64,6 @@ function ImageViewer() {
         sendViewportDetails();
     }, [image]);
 
-
-
     if (isLoading) {
         return <div>getting the game ready!</div>;
     }
@@ -83,18 +82,21 @@ function ImageViewer() {
         const x = e.clientX - frame.left;
         const y = e.clientY - frame.top;
         setTag({ x, y });
+        if (!selectedRiddle) {
+            setTagFlag(true);
+            setIsTagging(false);
+            return;
+        }
         toggleTagging();
     }
-
-
 
     async function handleTagSubmission(e) {
         e.preventDefault();
         console.log(riddles[selectedRiddle]);
-        console.log('selected riddle at tag:', selectedRiddle),
-        console.log('tag at validation', tag);
-        const results = await apiCheckTag(selectedRiddle, tag)
-        console.log('correctness:', results)
+        console.log("selected riddle at tag:", selectedRiddle),
+            console.log("tag at validation", tag);
+        const results = await apiCheckTag(selectedRiddle, tag);
+        console.log("correctness:", results);
         if (results.correct) {
             const updatedRiddles = {
                 ...riddles,
@@ -104,12 +106,13 @@ function ImageViewer() {
                 },
             };
             setRiddles(updatedRiddles);
+            setSelectedRiddle(null);
             setPlayerCorrect(true);
             if (results.roundCompleted) {
                 setIsRunning(false);
                 setPlayerWon(true);
                 setImageIdIndex((prevIndex) => prevIndex++);
-            };
+            }
             toggleTagging();
             return;
         }
@@ -120,7 +123,7 @@ function ImageViewer() {
 
     function selectRiddle(e) {
         const selectedRiddle = e.target.id;
-        console.log(selectedRiddle);
+        if (tagFlag) setTagFlag(false);
         setSelectedRiddle(selectedRiddle);
     }
 
@@ -133,6 +136,21 @@ function ImageViewer() {
                 onClick={tagTarget}
                 ref={imageRef}
             />
+            {tagFlag && (
+                <div
+                    style={{
+                        border: "1px solid black",
+                        backgroundColor: "pink",
+                        position: "absolute",
+                        left: `${tag.x}px`,
+                        top: `${tag.y}px`,
+                        transform: "translate(-10%, -10%)",
+                        zIndex: 1000,
+                    }}
+                >
+                    You have to select a riddle first
+                </div>
+            )}
             <Timer isRunning={isRunning} playerWon={playerWon} />
 
             {Object.keys(riddles).map((riddle) => {
@@ -158,7 +176,7 @@ function ImageViewer() {
                     sorry, you got it wrong, but keep going, time is ticking!
                 </div>
             )}
-            {isTagging && (
+            {isTagging && !tagFlag && (
                 <form
                     onSubmit={handleTagSubmission}
                     style={{
