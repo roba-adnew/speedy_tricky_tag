@@ -37,9 +37,10 @@ function ImageViewer() {
             setImage(imageFile);
 
             const imageRiddles = fileObject.details;
-            Object.keys(imageRiddles).forEach(
-                (key) => (imageRiddles[key].answered = false)
-            );
+            Object.keys(imageRiddles).forEach((riddle) => {
+                imageRiddles[riddle].answered = false;
+                imageRiddles[riddle].tag = null;
+            });
 
             setRiddles(fileObject.details);
 
@@ -103,6 +104,7 @@ function ImageViewer() {
                 [selectedRiddle]: {
                     ...riddles[selectedRiddle],
                     answered: true,
+                    tag: tag,
                 },
             };
             setRiddles(updatedRiddles);
@@ -153,22 +155,45 @@ function ImageViewer() {
             )}
             <Timer isRunning={isRunning} playerWon={playerWon} />
 
-            {Object.keys(riddles).map((riddle) => {
+            {Object.keys(riddles).map((riddle, i) => {
                 return (
-                    <p
-                        key={riddle}
-                        id={riddle}
-                        style={{
-                            border: riddles[riddle]?.answered
-                                ? "1px solid green"
-                                : selectedRiddle === riddle
-                                ? "1px solid blue"
-                                : "none",
-                        }}
-                        onClick={riddles[riddle].answered ? null : selectRiddle}
-                    >
-                        {riddles[riddle].question}
-                    </p>
+                    <>
+                        {riddles[riddle]?.answered && (
+                            <div
+                                className="correctMarker"
+                                style={{
+                                    border: "3px solid white",
+                                    width: "10px",
+                                    borderRadius: "10px",
+                                    textAlign: "center",
+                                    position: "absolute",
+                                    left: `${riddles[riddle]?.tag.x}px`,
+                                    top: `${riddles[riddle]?.tag.y}px`,
+                                    transform: "translate(-10%, -10%)",
+                                    zIndex: 1000,
+                                    
+                                }}
+                            >
+                                {i + 1}
+                            </div>
+                        )}
+                        <p
+                            key={riddle}
+                            id={riddle}
+                            style={{
+                                border: riddles[riddle]?.answered
+                                    ? "1px solid green"
+                                    : selectedRiddle === riddle
+                                    ? "1px solid blue"
+                                    : "none",
+                            }}
+                            onClick={
+                                riddles[riddle].answered ? null : selectRiddle
+                            }
+                        >
+                            {`${i + 1}. ${riddles[riddle].question}`}
+                        </p>
+                    </>
                 );
             })}
 

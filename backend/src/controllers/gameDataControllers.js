@@ -224,6 +224,6 @@ function checkRoundCompleted() {
         (riddle) => riddles[riddle].answered
     );
     const roundCompleted = answeredFlags.every(isCorrect);
-    debug('answered flags after checking:', answeredFlags)
+    debug("answered flags after checking:", answeredFlags);
     return roundCompleted;
 }
