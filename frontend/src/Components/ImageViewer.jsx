@@ -12,7 +12,7 @@ import "../Styles/ImageViewer.css";
 function ImageViewer() {
     const [imageIdsIndex, setImageIdIndex] = useState(0);
 
-    const [playerCorrect, setPlayerCorrect] = useState(false);
+    const [playerCorrect, setPlayerCorrect] = useState(null);
     const [playerWon, setPlayerWon] = useState(false);
     const [isRunning, setIsRunning] = useState(false);
 
@@ -197,11 +197,12 @@ function ImageViewer() {
                 );
             })}
 
-            {!playerCorrect && (
+            {!!playerCorrect && (
                 <div>
                     sorry, you got it wrong, but keep going, time is ticking!
                 </div>
             )}
+
             {isTagging && !tagFlag && (
                 <form
                     onSubmit={handleTagSubmission}

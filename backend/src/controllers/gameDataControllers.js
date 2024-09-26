@@ -115,11 +115,16 @@ exports.getImageMeta = async (req, res, next) => {
 };
 
 exports.receiveViewportDetails = (req, res, next) => {
-    viewportDetails = req.body.viewportDetails;
-    debug("viewport:", viewportDetails);
-    if (!viewportDetails) {
+    if (!req.body.viewportDetails) {
         res.status(400).json({ message: "details were not received" });
     }
+    if (!userData.has(req.sessionID)) {
+        userData.set(req.sessionID, { viewportDetails: null });
+    }
+    const sessionData = userData.get(req.sessionID);
+    sessionData.viewportDetails = req.body.viewportDetails;
+    debug("viewport:", sessionData.viewportDetails);
+
     scaleTargets(req.sessionID);
     res.status(201);
 };
@@ -194,11 +199,13 @@ exports.checkTag = (req, res, next) => {
 };
 
 function scaleTargets(sessionID) {
-    const { scalingFactor, xOffset, yOffset } = viewportDetails;
     const sessionData = userData.get(sessionID);
+    const { scalingFactor, xOffset, yOffset } = sessionData.viewportDetails;
     const riddleKeys = Object.keys(sessionData.riddles);
     riddleKeys.forEach((riddle) => {
-        sessionData.riddles[riddle].scaledTargets = sessionData.riddles[riddle].targets.map((target) =>
+        sessionData.riddles[riddle].scaledTargets = sessionData.riddles[
+            riddle
+        ].targets.map((target) =>
             target.map((coord) => ({
                 x: scalingFactor * (coord.x + xOffset),
                 y: scalingFactor * (coord.y + yOffset),
