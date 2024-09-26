@@ -6,8 +6,7 @@ const { createClient } = require("@supabase/supabase-js");
 const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 
-const userTimers = new Map();
-const riddles = {};
+const userData = new Map();
 let viewportDetails;
 
 exports.getImageIds = async (req, res, next) => {
@@ -90,9 +89,14 @@ exports.getImageMeta = async (req, res, next) => {
             },
         });
         const clientRiddles = {};
+        if (!userData.has(req.sessionID)) {
+            userData.set(req.sessionID, { riddles: {} });
+        }
+        const sessionData = userData.get(req.sessionID);
+        debug("userData map riddles: %O", sessionData.riddles);
 
         for (let riddle in imageMeta) {
-            riddles[riddle] = {
+            sessionData.riddles[riddle] = {
                 question: imageMeta[riddle].question,
                 targets: imageMeta[riddle].targets,
                 answered: false,
@@ -116,7 +120,7 @@ exports.receiveViewportDetails = (req, res, next) => {
     if (!viewportDetails) {
         res.status(400).json({ message: "details were not received" });
     }
-    scaleTargets();
+    scaleTargets(req.sessionID);
     res.status(201);
 };
 
@@ -124,24 +128,26 @@ exports.startTimer = async (req, res, next) => {
     const sessionID = req.sessionID;
     debug("starter sessionId:", sessionID);
 
-    if (userTimers.has(sessionID)) {
+    let sessionData = userData.get(sessionID) || {};
+
+    if (sessionData.timerData) {
         return res
             .status(400)
             .json({ message: "Timer already running for this session" });
     }
 
-    const timerData = { signal: null, time: 0 };
+    sessionData.timerData = { signal: null, time: 0 };
 
     const interval = setInterval(() => {
-        timerData.time += 250;
+        sessionData.timerData.time += 250;
 
-        if (timerData.signal === "stop") {
+        if (sessionData.timerData.signal === "stop") {
             clearInterval(interval);
-            userTimers.delete(sessionID);
+            userData.delete(sessionID);
         }
     }, 250);
 
-    userTimers.set(sessionID, timerData);
+    userData.set(sessionID, sessionData);
     return res.status(200).json({ message: "timer set-up" });
 };
 
@@ -150,13 +156,14 @@ exports.stopTimer = async (req, res, next) => {
     const { signal } = req.body;
     debug("stopper sessionId:", sessionID);
 
-    if (!userTimers.has(sessionID)) {
+    const sessionData = userData.get(sessionID);
+
+    if (!sessionData?.timerData) {
         return res.status(400).json({ message: "No timer set for this user" });
     }
 
     if (signal === "stop") {
-        const timerData = userTimers.get(sessionID);
-        timerData.signal = signal;
+        sessionData.timerData.signal = signal;
         return res.status(200).json({ message: "Signal set to stop" });
     }
     return res.status(400).json({ message: "Invalid signal" });
@@ -164,30 +171,34 @@ exports.stopTimer = async (req, res, next) => {
 
 exports.getTime = (req, res, next) => {
     const sessionID = req.sessionID;
-    if (!userTimers.has(sessionID)) {
+    const sessionData = userData.get(sessionID);
+
+    if (!sessionData?.timerData) {
         return res
             .status(400)
             .json({ message: "No timer running for this session" });
     }
-    const timerData = userTimers.get(sessionID);
-    res.json({ time: timerData.time });
+
+    res.json({ time: sessionData.timerData.time });
 };
 
 exports.checkTag = (req, res, next) => {
     const { riddle, tag } = req.body;
-    const correct = validateTag(riddle, tag);
-    if (correct) riddles[riddle].answered = true;
-    const roundCompleted = checkRoundCompleted();
+    const sessionData = userData.get(req.sessionID);
+    const correct = validateTag(req.sessionID, riddle, tag);
+    if (correct) sessionData.riddles[riddle].answered = true;
+    const roundCompleted = checkRoundCompleted(req.sessionID);
     return res
         .status(200)
         .json({ correct: correct, roundCompleted: roundCompleted });
 };
 
-function scaleTargets() {
+function scaleTargets(sessionID) {
     const { scalingFactor, xOffset, yOffset } = viewportDetails;
-    const riddleKeys = Object.keys(riddles);
+    const sessionData = userData.get(sessionID);
+    const riddleKeys = Object.keys(sessionData.riddles);
     riddleKeys.forEach((riddle) => {
-        riddles[riddle].scaledTargets = riddles[riddle].targets.map((target) =>
+        sessionData.riddles[riddle].scaledTargets = sessionData.riddles[riddle].targets.map((target) =>
             target.map((coord) => ({
                 x: scalingFactor * (coord.x + xOffset),
                 y: scalingFactor * (coord.y + yOffset),
@@ -196,10 +207,11 @@ function scaleTargets() {
     });
 }
 
-function validateTag(riddle, tag) {
+function validateTag(sessionID, riddle, tag) {
     debug("riddle and tag mid validation:", riddle, tag);
     let isInside = false;
-    const riddleTargets = riddles[riddle].scaledTargets;
+    const sessionData = userData.get(sessionID);
+    const riddleTargets = sessionData.riddles[riddle].scaledTargets;
     for (let target of riddleTargets) {
         const numEdges = target.length;
         for (let i = 0, j = numEdges - 1; i < numEdges; j = i, i++) {
@@ -218,10 +230,11 @@ function validateTag(riddle, tag) {
     return isInside;
 }
 
-function checkRoundCompleted() {
+function checkRoundCompleted(sessionID) {
     const isCorrect = (flag) => flag === true;
-    const answeredFlags = Object.keys(riddles).map(
-        (riddle) => riddles[riddle].answered
+    const sessionData = userData.get(sessionID);
+    const answeredFlags = Object.keys(sessionData.riddles).map(
+        (riddle) => sessionData.riddles[riddle].answered
     );
     const roundCompleted = answeredFlags.every(isCorrect);
     debug("answered flags after checking:", answeredFlags);
