@@ -29,6 +29,11 @@ exports.downloadImage = async (req, res, next) => {
     if (!imageId) {
         return res.status(400).json({ error: "Image name is required" });
     }
+
+    if (!userData.has(req.sessionID)) {
+        userData.set(req.sessionID, { riddles: {} });
+    }
+    setActiveRound(req.sessionID, imageId);
     try {
         const results = await prisma.image.findFirst({
             where: { id: imageId },
@@ -120,9 +125,9 @@ exports.receiveViewportDetails = (req, res, next) => {
     if (!userData.has(req.sessionID)) {
         userData.set(req.sessionID, { viewportDetails: null });
     }
-    const sessionData = userData.get(req.sessionID);
-    sessionData.viewportDetails = req.body.viewportDetails;
-    debug("viewport:", sessionData.viewportDetails);
+    const roundData = getActiveRoundData(req.sessionID);
+    roundData.viewportDetails = req.body.viewportDetails;
+    debug("viewport:", roundData.viewportDetails);
 
     scaleTargets(req.sessionID);
     res.status(201);
@@ -176,7 +181,7 @@ exports.stopTimer = async (req, res, next) => {
 exports.getTime = (req, res, next) => {
     const sessionID = req.sessionID;
     const sessionData = userData.get(sessionID);
-    debug('get time session data: %O', sessionData)
+    //debug("get time session data: %O", sessionData.timerData);
 
     if (!sessionData?.timerData) {
         return res
@@ -199,8 +204,9 @@ exports.checkTag = (req, res, next) => {
 };
 
 function scaleTargets(sessionID) {
+    const roundData = getActiveRoundData(sessionID);
+    const { scalingFactor, xOffset, yOffset } = roundData.viewportDetails;
     const sessionData = userData.get(sessionID);
-    const { scalingFactor, xOffset, yOffset } = sessionData.viewportDetails;
     const riddleKeys = Object.keys(sessionData.riddles);
     riddleKeys.forEach((riddle) => {
         sessionData.riddles[riddle].scaledTargets = sessionData.riddles[
@@ -246,4 +252,38 @@ function checkRoundCompleted(sessionID) {
     const roundCompleted = answeredFlags.every(isCorrect);
     debug("answered flags after checking:", answeredFlags);
     return roundCompleted;
+}
+
+function setActiveRound(sessionID, imageId) {
+    if (!userData.has(`${sessionID}-test`)) {
+        userData.set(`${sessionID}-test`, {
+            [imageId]: {
+                active: true,
+                timerData: null,
+                riddles: {},
+                viewportDetails: null,
+            },
+        });
+    }
+}
+
+function getActiveRoundData(sessionID) {
+    if (!userData.has(`${sessionID}-test`)) {
+        debug("cannot retrieve session data for this user, none exists");
+    }
+
+    const gameData = userData.get(`${sessionID}-test`);
+    const imageIds = Object.keys(gameData);
+    debug("game data keys check", imageIds);
+
+    const activeImageId = imageIds.map((imageId) => {
+        if (gameData[imageId].active) return imageId;
+    });
+
+    if (activeImageId.length > 1) {
+        debug("there is more than one active round");
+        return;
+    }
+    debug("get active round final return", gameData[activeImageId[0]]);
+    return gameData[activeImageId[0]];
 }
