@@ -37,12 +37,7 @@ function ImageViewer() {
             setImage(imageFile);
 
             const imageRiddles = fileObject.details;
-            Object.keys(imageRiddles).forEach((riddle) => {
-                imageRiddles[riddle].answered = false;
-                imageRiddles[riddle].tag = null;
-            });
-
-            setRiddles(fileObject.details);
+            setRiddles(imageRiddles);
 
             setIsLoading(false);
             await apiStartTimer();

@@ -92,13 +92,11 @@ exports.getImageMeta = async (req, res, next) => {
                 riddle7: true,
             },
         });
-        const clientRiddles = {};
-        if (!userData.has(req.sessionID)) {
-            userData.set(req.sessionID, { riddles: {} });
-        }
-        const sessionData = userData.get(req.sessionID);
+
+        const sessionData = getActiveRoundData(req.sessionID)
         debug("userData map riddles: %O", sessionData.riddles);
 
+        const clientRiddles = {};
         for (let riddle in imageMeta) {
             sessionData.riddles[riddle] = {
                 question: imageMeta[riddle].question,
@@ -109,6 +107,7 @@ exports.getImageMeta = async (req, res, next) => {
             clientRiddles[riddle] = {
                 question: imageMeta[riddle].question,
                 answered: false,
+                tag: null
             };
         }
 
@@ -194,7 +193,7 @@ exports.getTime = (req, res, next) => {
 
 exports.checkTag = (req, res, next) => {
     const { riddle, tag } = req.body;
-    const sessionData = userData.get(req.sessionID);
+    const sessionData = getActiveRoundData(req.sessionID);
     const correct = validateTag(req.sessionID, riddle, tag);
     if (correct) sessionData.riddles[riddle].answered = true;
     const roundCompleted = checkRoundCompleted(req.sessionID);
@@ -206,10 +205,10 @@ exports.checkTag = (req, res, next) => {
 function scaleTargets(sessionID) {
     const roundData = getActiveRoundData(sessionID);
     const { scalingFactor, xOffset, yOffset } = roundData.viewportDetails;
-    const sessionData = userData.get(sessionID);
-    const riddleKeys = Object.keys(sessionData.riddles);
+    //const sessionData = userData.get(sessionID);
+    const riddleKeys = Object.keys(roundData.riddles);
     riddleKeys.forEach((riddle) => {
-        sessionData.riddles[riddle].scaledTargets = sessionData.riddles[
+        roundData.riddles[riddle].scaledTargets = roundData.riddles[
             riddle
         ].targets.map((target) =>
             target.map((coord) => ({
@@ -223,7 +222,7 @@ function scaleTargets(sessionID) {
 function validateTag(sessionID, riddle, tag) {
     debug("riddle and tag mid validation:", riddle, tag);
     let isInside = false;
-    const sessionData = userData.get(sessionID);
+    const sessionData = getActiveRoundData(sessionID)
     const riddleTargets = sessionData.riddles[riddle].scaledTargets;
     for (let target of riddleTargets) {
         const numEdges = target.length;
@@ -245,7 +244,7 @@ function validateTag(sessionID, riddle, tag) {
 
 function checkRoundCompleted(sessionID) {
     const isCorrect = (flag) => flag === true;
-    const sessionData = userData.get(sessionID);
+    const sessionData = getActiveRoundData(sessionID);
     const answeredFlags = Object.keys(sessionData.riddles).map(
         (riddle) => sessionData.riddles[riddle].answered
     );
