@@ -155,6 +155,7 @@ function ImageViewer() {
                     <>
                         {riddles[riddle]?.answered && (
                             <div
+                                key={`${riddle}-answer-marker`}
                                 className="correctMarker"
                                 style={{
                                     border: "3px solid white",

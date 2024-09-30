@@ -30,9 +30,6 @@ exports.downloadImage = async (req, res, next) => {
         return res.status(400).json({ error: "Image name is required" });
     }
 
-    if (!userData.has(req.sessionID)) {
-        userData.set(req.sessionID, { riddles: {} });
-    }
     setActiveRound(req.sessionID, imageId);
     try {
         const results = await prisma.image.findFirst({
@@ -93,8 +90,7 @@ exports.getImageMeta = async (req, res, next) => {
             },
         });
 
-        const sessionData = getActiveRoundData(req.sessionID)
-        debug("userData map riddles: %O", sessionData.riddles);
+        const sessionData = getActiveRoundData(req.sessionID);
 
         const clientRiddles = {};
         for (let riddle in imageMeta) {
@@ -107,7 +103,7 @@ exports.getImageMeta = async (req, res, next) => {
             clientRiddles[riddle] = {
                 question: imageMeta[riddle].question,
                 answered: false,
-                tag: null
+                tag: null,
             };
         }
 
@@ -121,9 +117,6 @@ exports.receiveViewportDetails = (req, res, next) => {
     if (!req.body.viewportDetails) {
         res.status(400).json({ message: "details were not received" });
     }
-    if (!userData.has(req.sessionID)) {
-        userData.set(req.sessionID, { viewportDetails: null });
-    }
     const roundData = getActiveRoundData(req.sessionID);
     roundData.viewportDetails = req.body.viewportDetails;
     debug("viewport:", roundData.viewportDetails);
@@ -133,38 +126,32 @@ exports.receiveViewportDetails = (req, res, next) => {
 };
 
 exports.startTimer = async (req, res, next) => {
-    const sessionID = req.sessionID;
-    debug("starter sessionId:", sessionID);
+    const sessionData = getActiveRoundData(req.sessionID);
+    debug("start timer session data:", sessionData);
+    const updateIntervalMS = 500;
 
-    let sessionData = userData.get(sessionID) || {};
-
-    if (sessionData.timerData) {
-        return res
-            .status(400)
-            .json({ message: "Timer already running for this session" });
+    if (sessionData.timerData.interval) {
+        debug("Timer is already running for this session.");
+        return res.status(200).json({ message: "Timer is already running" });
     }
 
-    sessionData.timerData = { signal: null, time: 0 };
-
-    const interval = setInterval(() => {
-        sessionData.timerData.time += 250;
+    sessionData.timerData.interval = setInterval(() => {
+        sessionData.timerData.time += updateIntervalMS;
 
         if (sessionData.timerData.signal === "stop") {
-            clearInterval(interval);
-            userData.delete(sessionID);
+            clearInterval(sessionData.timerData.interval);
+            sessionData.timerData.interval = null;
         }
-    }, 250);
+    }, updateIntervalMS);
 
-    userData.set(sessionID, sessionData);
     return res.status(200).json({ message: "timer set-up" });
 };
 
 exports.stopTimer = async (req, res, next) => {
-    const sessionID = req.sessionID;
     const { signal } = req.body;
     debug("stopper sessionId:", sessionID);
 
-    const sessionData = userData.get(sessionID);
+    const sessionData = getActiveRoundData(req.sessionID);
 
     if (!sessionData?.timerData) {
         return res.status(400).json({ message: "No timer set for this user" });
@@ -172,15 +159,15 @@ exports.stopTimer = async (req, res, next) => {
 
     if (signal === "stop") {
         sessionData.timerData.signal = signal;
+        clearInterval(sessionData.timerData.interval);
+        sessionData.timerData.interval = null; 
         return res.status(200).json({ message: "Signal set to stop" });
     }
     return res.status(400).json({ message: "Invalid signal" });
 };
 
 exports.getTime = (req, res, next) => {
-    const sessionID = req.sessionID;
-    const sessionData = userData.get(sessionID);
-    //debug("get time session data: %O", sessionData.timerData);
+    const sessionData = getActiveRoundData(req.sessionID);
 
     if (!sessionData?.timerData) {
         return res
@@ -205,7 +192,6 @@ exports.checkTag = (req, res, next) => {
 function scaleTargets(sessionID) {
     const roundData = getActiveRoundData(sessionID);
     const { scalingFactor, xOffset, yOffset } = roundData.viewportDetails;
-    //const sessionData = userData.get(sessionID);
     const riddleKeys = Object.keys(roundData.riddles);
     riddleKeys.forEach((riddle) => {
         roundData.riddles[riddle].scaledTargets = roundData.riddles[
@@ -222,7 +208,7 @@ function scaleTargets(sessionID) {
 function validateTag(sessionID, riddle, tag) {
     debug("riddle and tag mid validation:", riddle, tag);
     let isInside = false;
-    const sessionData = getActiveRoundData(sessionID)
+    const sessionData = getActiveRoundData(sessionID);
     const riddleTargets = sessionData.riddles[riddle].scaledTargets;
     for (let target of riddleTargets) {
         const numEdges = target.length;
@@ -254,11 +240,11 @@ function checkRoundCompleted(sessionID) {
 }
 
 function setActiveRound(sessionID, imageId) {
-    if (!userData.has(`${sessionID}-test`)) {
-        userData.set(`${sessionID}-test`, {
+    if (!userData.has(sessionID)) {
+        userData.set(sessionID, {
             [imageId]: {
                 active: true,
-                timerData: null,
+                timerData: { signal: null, time: 0, interval: null },
                 riddles: {},
                 viewportDetails: null,
             },
@@ -267,22 +253,19 @@ function setActiveRound(sessionID, imageId) {
 }
 
 function getActiveRoundData(sessionID) {
-    if (!userData.has(`${sessionID}-test`)) {
+    if (!userData.has(`${sessionID}`)) {
         debug("cannot retrieve session data for this user, none exists");
     }
 
-    const gameData = userData.get(`${sessionID}-test`);
+    const gameData = userData.get(sessionID);
     const imageIds = Object.keys(gameData);
-    debug("game data keys check", imageIds);
 
-    const activeImageId = imageIds.map((imageId) => {
-        if (gameData[imageId].active) return imageId;
-    });
+    const activeImageId = imageIds.filter((imageId) => gameData[imageId].active
+    );
 
     if (activeImageId.length > 1) {
         debug("there is more than one active round");
         return;
     }
-    debug("get active round final return", gameData[activeImageId[0]]);
     return gameData[activeImageId[0]];
 }
