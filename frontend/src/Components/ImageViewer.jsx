@@ -13,7 +13,7 @@ function ImageViewer() {
     const [imageIdsIndex, setImageIdIndex] = useState(0);
 
     const [playerCorrect, setPlayerCorrect] = useState(null);
-    const [playerWon, setPlayerWon] = useState(false);
+    const [playerWon, setPlayerWon] = useState(null);
     const [isRunning, setIsRunning] = useState(false);
 
     const [selectedRiddle, setSelectedRiddle] = useState(null);
@@ -171,7 +171,6 @@ function ImageViewer() {
                                     top: `${riddles[riddle]?.tag.y}px`,
                                     transform: "translate(-10%, -10%)",
                                     zIndex: 1000,
-                                    
                                 }}
                             >
                                 {i + 1}
@@ -197,7 +196,13 @@ function ImageViewer() {
                 );
             })}
 
-            {!!playerCorrect && (
+            {isRunning && playerCorrect && (
+                <div>
+                    NOICE! Got that one right!
+                </div>
+            )}
+
+            {isRunning && !playerCorrect && (
                 <div>
                     sorry, you got it wrong, but keep going, time is ticking!
                 </div>

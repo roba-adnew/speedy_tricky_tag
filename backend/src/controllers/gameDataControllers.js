@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 
 const userData = new Map();
-let viewportDetails;
 
 exports.getImageIds = async (req, res, next) => {
     try {
@@ -177,6 +176,7 @@ exports.stopTimer = async (req, res, next) => {
 exports.getTime = (req, res, next) => {
     const sessionID = req.sessionID;
     const sessionData = userData.get(sessionID);
+    debug('get time session data: %O', sessionData)
 
     if (!sessionData?.timerData) {
         return res
