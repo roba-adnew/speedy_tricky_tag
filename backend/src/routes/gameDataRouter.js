@@ -15,8 +15,6 @@ router.post(
 
 router.post("/start-timer", gameDataController.startTimer);
 
-router.post("/stop-timer", gameDataController.stopTimer);
-
 router.post("/get-time", gameDataController.getTime);
 
 router.post("/check-tag", gameDataController.checkTag);

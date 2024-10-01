@@ -87,26 +87,6 @@ async function startTimer() {
     }
 }
 
-async function stopTimer() {
-    const url = `${base_url}/stop-timer`;
-
-    const options = {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-type": "application/json" },
-        body: JSON.stringify({ signal: "stop" }),
-    };
-
-    try {
-        const response = await fetch(url, options);
-        const results = await response.json();
-        return results.finalTime;
-    } catch (err) {
-        console.error("timer commencement error:", err);
-        throw err;
-    }
-}
-
 async function getTime() {
     const url = `${base_url}/get-time`;
 
@@ -152,6 +132,5 @@ export {
     sendViewportDetails,
     startTimer,
     getTime,
-    stopTimer,
     checkTag,
 };

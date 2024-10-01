@@ -148,28 +148,6 @@ exports.startTimer = async (req, res, next) => {
     return res.status(200).json({ message: "timer set-up" });
 };
 
-exports.stopTimer = async (req, res, next) => {
-    const { signal } = req.body;
-    const sessionData = getActiveRoundData(req.sessionID);
-
-    if (!sessionData?.timerData) {
-        return res.status(400).json({ message: "No timer set for this user" });
-    }
-
-    if (signal === "stop") {
-        sessionData.timerData.signal = signal;
-        sessionData.timerData.finalTime = sessionData.timerData.time;
-        clearInterval(sessionData.timerData.interval);
-        sessionData.timerData.interval = null;
-        debug("final time for this round:", sessionData.timerData.finalTime);
-        return res.status(200).json({
-            finalTime: sessionData.timerData.finalTime,
-            message: "Signal set to stop",
-        });
-    }
-
-    return res.status(400).json({ message: "Invalid signal" });
-};
 
 exports.getTime = (req, res, next) => {
     const sessionData = getActiveRoundData(req.sessionID);
@@ -188,10 +166,10 @@ exports.checkTag = (req, res, next) => {
     const sessionData = getActiveRoundData(req.sessionID);
     const correct = validateTag(req.sessionID, riddle, tag);
     if (correct) sessionData.riddles[riddle].answered = true;
-    const roundCompleted = checkRoundCompleted(req.sessionID);
+    const roundResults = checkRoundResults(req.sessionID);
     return res
         .status(200)
-        .json({ correct: correct, roundCompleted: roundCompleted });
+        .json({ correct: correct, roundResults: roundResults });
 };
 
 function scaleTargets(sessionID) {
@@ -211,10 +189,15 @@ function scaleTargets(sessionID) {
 }
 
 function validateTag(sessionID, riddle, tag) {
-    debug("riddle and tag mid validation:", riddle, tag);
     let isInside = false;
     const sessionData = getActiveRoundData(sessionID);
     const riddleTargets = sessionData.riddles[riddle].scaledTargets;
+    debug(
+        "targets, riddle and tag mid validation:",
+        riddleTargets,
+        riddle,
+        tag
+    );
     for (let target of riddleTargets) {
         const numEdges = target.length;
         for (let i = 0, j = numEdges - 1; i < numEdges; j = i, i++) {
@@ -233,15 +216,25 @@ function validateTag(sessionID, riddle, tag) {
     return isInside;
 }
 
-function checkRoundCompleted(sessionID) {
+function checkRoundResults(sessionID) {
+    const roundResults = { roundCompleted: false, finalTime: null };
     const isCorrect = (flag) => flag === true;
     const sessionData = getActiveRoundData(sessionID);
     const answeredFlags = Object.keys(sessionData.riddles).map(
         (riddle) => sessionData.riddles[riddle].answered
     );
-    const roundCompleted = answeredFlags.every(isCorrect);
-    if (roundCompleted) sessionData.active = false;
-    return roundCompleted;
+    roundResults.roundCompleted = answeredFlags.every(isCorrect);
+
+    if (roundResults.roundCompleted) {
+        sessionData.active = false;
+        sessionData.timerData.finalTime = roundResults.finalTime =
+            sessionData.timerData.time;
+        clearInterval(sessionData.timerData.interval);
+        sessionData.timerData.interval = null;
+        debug("final time for this round:", sessionData.timerData.finalTime);
+    }
+
+    return roundResults;
 }
 
 function setActiveRound(sessionID, imageId) {
@@ -286,6 +279,5 @@ function getActiveRoundData(sessionID) {
         debug("there is more than one active round");
         return;
     }
-    debug("active image:", activeImageId[0]);
     return gameData[activeImageId[0]];
 }

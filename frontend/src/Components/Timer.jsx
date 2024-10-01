@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import {
     startTimer as apiStartTimer,
-    stopTimer as apiStopTimer,
     getTime as apiGetTime,
 } from "../utils/api";
 
@@ -19,9 +18,8 @@ function formattedTime(timeMS) {
     return displayTime;
 }
 
-function Timer({ isRunning, playerWon }) {
+function Timer({ isRunning, playerWon, successTime }) {
     const [time, setTime] = useState(0);
-    const [successTime, setSuccessTime] = useState(0);
 
     useEffect(() => {
         async function startTime() {
@@ -54,13 +52,13 @@ function Timer({ isRunning, playerWon }) {
         
     }, [isRunning]);
 
-    useEffect(() => {
-        async function stopRound() {
-            const finalTime = await apiStopTimer();
-            setSuccessTime(finalTime);
-        }
-        if (playerWon) stopRound();
-    }, [playerWon]);
+    // useEffect(() => {
+    //     async function stopRound() {
+    //         const finalTime = await apiStopTimer();
+    //         setSuccessTime(finalTime);
+    //     }
+    //     if (playerWon) stopRound();
+    // }, [playerWon]);
 
     return (
         <>
@@ -77,6 +75,7 @@ function Timer({ isRunning, playerWon }) {
 Timer.propTypes = {
     isRunning: PropTypes.bool,
     playerWon: PropTypes.bool,
+    successTime: PropTypes.number
 };
 
 export default Timer;

@@ -15,6 +15,7 @@ function ImageViewer() {
 
     const [playerCorrect, setPlayerCorrect] = useState(null);
     const [playerWon, setPlayerWon] = useState(null);
+    const [successTime, setSuccessTime] = useState(null);
     const [isRunning, setIsRunning] = useState(false);
 
     const [selectedRiddle, setSelectedRiddle] = useState(null);
@@ -32,14 +33,14 @@ function ImageViewer() {
 
     useEffect(() => {
         async function getFile() {
-            setPlayerCorrect(null)
+            setPlayerCorrect(null);
             setPlayerWon(null);
             const fileObject = await apiGetImage(imageIds[imageIdsIndex]);
             const imageFile = fileObject.content;
             setImage(imageFile);
 
             const imageRiddles = fileObject.details;
-            console.log('riddles from api', imageRiddles)
+            console.log("riddles from api", imageRiddles);
             setRiddles(imageRiddles);
 
             setIsLoading(false);
@@ -95,8 +96,11 @@ function ImageViewer() {
 
     async function handleTagSubmission(e) {
         e.preventDefault();
-        const results = await apiCheckTag(selectedRiddle, tag);
-        if (results.correct) {
+        const { correct, roundResults } = await apiCheckTag(
+            selectedRiddle,
+            tag
+        );
+        if (correct) {
             const updatedRiddles = {
                 ...riddles,
                 [selectedRiddle]: {
@@ -110,8 +114,9 @@ function ImageViewer() {
             setPlayerCorrect(true);
             toggleTagging();
 
-            if (results.roundCompleted) {
+            if (roundResults.roundCompleted) {
                 console.log("won the round!");
+                setSuccessTime(roundResults.finalTime)
                 setIsRunning(false);
                 setPlayerWon(true);
                 setImageIdIndex((prevIndex) => prevIndex + 1);
@@ -149,7 +154,11 @@ function ImageViewer() {
                 </div>
             )}
 
-            <Timer isRunning={isRunning} playerWon={playerWon} imageIdsIndex={imageIdsIndex}/>
+            <Timer
+                isRunning={isRunning}
+                playerWon={playerWon}
+                successTime={successTime}
+            />
 
             {Object.keys(riddles).map((riddle, i) => {
                 return (
