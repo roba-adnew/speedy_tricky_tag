@@ -69,23 +69,6 @@ async function sendViewportDetails(viewportDetails) {
     }
 }
 
-async function startTimer() {
-    const url = `${base_url}/start-timer`;
-
-    const options = {
-        method: "POST",
-        credentials: "include",
-    };
-
-    try {
-        const response = await fetch(url, options);
-        const results = await response.json();
-        return results;
-    } catch (err) {
-        console.error("timer commencement error:", err);
-        throw err;
-    }
-}
 
 async function getTime() {
     const url = `${base_url}/get-time`;
@@ -130,7 +113,6 @@ export {
     getImageSetMeta,
     getImageDetails,
     sendViewportDetails,
-    startTimer,
     getTime,
     checkTag,
 };

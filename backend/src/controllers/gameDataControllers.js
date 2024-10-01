@@ -108,7 +108,7 @@ exports.getImageMeta = async (req, res, next) => {
             };
         }
 
-        startTimer(req.sessionID)
+        startTimer(req.sessionID);
         return res.json(clientRiddles);
     } catch (err) {
         debug("unexpected error", err);
@@ -126,26 +126,6 @@ exports.receiveViewportDetails = (req, res, next) => {
     scaleTargets(req.sessionID);
     res.status(201);
 };
-
-function startTimer(sessionID) {
-    const sessionData = getActiveRoundData(sessionID);
-    debug("start timer session data:", sessionData?.timerData?.interval);
-    const updateIntervalMS = 500;
-
-    if (sessionData.timerData.interval) {
-        debug("Timer is already running for this round.");
-    }
-
-    sessionData.timerData.interval = setInterval(() => {
-        sessionData.timerData.time += updateIntervalMS;
-
-        if (sessionData.timerData.signal === "stop") {
-            clearInterval(sessionData.timerData.interval);
-            sessionData.timerData.interval = null;
-        }
-    }, updateIntervalMS);
-};
-
 
 exports.getTime = (req, res, next) => {
     const sessionData = getActiveRoundData(req.sessionID);
@@ -169,6 +149,32 @@ exports.checkTag = (req, res, next) => {
         .status(200)
         .json({ correct: correct, roundResults: roundResults });
 };
+
+function startTimer(sessionID) {
+    const sessionData = getActiveRoundData(sessionID);
+    debug("start timer session data:", sessionData?.timerData?.interval);
+    const updateIntervalMS = 1000;
+
+    if (sessionData.timerData.interval) {
+        debug("Timer is already running for this round.");
+        return
+    }
+
+    sessionData.timerData.interval = setInterval(() => {
+        sessionData.timerData.time += updateIntervalMS;
+
+        if (sessionData.timerData.signal === "stop") {
+            clearInterval(sessionData.timerData.interval);
+            sessionData.timerData.interval = null;
+        }
+    }, updateIntervalMS);
+}
+
+function stopTimer(sessionID) {
+    const sessionData = getActiveRoundData(sessionID)
+    clearInterval(sessionData.timerData.interval);
+    sessionData.timerData.interval = null;
+}
 
 function scaleTargets(sessionID) {
     const roundData = getActiveRoundData(sessionID);
@@ -224,11 +230,9 @@ function checkRoundResults(sessionID) {
     roundResults.roundCompleted = answeredFlags.every(isCorrect);
 
     if (roundResults.roundCompleted) {
+        const finalTime = stopTimer(sessionID);
         sessionData.active = false;
-        sessionData.timerData.finalTime = roundResults.finalTime =
-            sessionData.timerData.time;
-        clearInterval(sessionData.timerData.interval);
-        sessionData.timerData.interval = null;
+        sessionData.timerData.finalTime = roundResults.finalTime = finalTime;
         debug("final time for this round:", sessionData.timerData.finalTime);
     }
 
