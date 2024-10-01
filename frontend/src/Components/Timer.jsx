@@ -21,12 +21,12 @@ function formattedTime(timeMS) {
 function Timer({ isRunning, playerWon, successTime }) {
     const [time, setTime] = useState(0);
 
-    useEffect(() => {
-        async function startTime() {
-            await apiStartTimer();
-        }
-        if (isRunning) startTime();
-    }, [isRunning]);
+    // useEffect(() => {
+    //     async function startTime() {
+    //         await apiStartTimer();
+    //     }
+    //     if (isRunning) startTime();
+    // }, [isRunning]);
 
     useEffect(() => {
         async function fetchTime() {

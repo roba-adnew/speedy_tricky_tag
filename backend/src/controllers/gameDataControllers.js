@@ -108,6 +108,7 @@ exports.getImageMeta = async (req, res, next) => {
             };
         }
 
+        startTimer(req.sessionID)
         return res.json(clientRiddles);
     } catch (err) {
         debug("unexpected error", err);
@@ -126,14 +127,13 @@ exports.receiveViewportDetails = (req, res, next) => {
     res.status(201);
 };
 
-exports.startTimer = async (req, res, next) => {
-    const sessionData = getActiveRoundData(req.sessionID);
+function startTimer(sessionID) {
+    const sessionData = getActiveRoundData(sessionID);
     debug("start timer session data:", sessionData?.timerData?.interval);
     const updateIntervalMS = 500;
 
     if (sessionData.timerData.interval) {
         debug("Timer is already running for this round.");
-        return res.status(200).json({ message: "Timer is already running" });
     }
 
     sessionData.timerData.interval = setInterval(() => {
@@ -144,8 +144,6 @@ exports.startTimer = async (req, res, next) => {
             sessionData.timerData.interval = null;
         }
     }, updateIntervalMS);
-
-    return res.status(200).json({ message: "timer set-up" });
 };
 
 

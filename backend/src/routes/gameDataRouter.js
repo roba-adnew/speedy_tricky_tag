@@ -13,7 +13,7 @@ router.post(
     gameDataController.receiveViewportDetails
 );
 
-router.post("/start-timer", gameDataController.startTimer);
+//router.post("/start-timer", gameDataController.startTimer);
 
 router.post("/get-time", gameDataController.getTime);
 
