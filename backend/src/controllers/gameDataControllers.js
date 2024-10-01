@@ -127,7 +127,7 @@ exports.receiveViewportDetails = (req, res, next) => {
 
 exports.startTimer = async (req, res, next) => {
     const sessionData = getActiveRoundData(req.sessionID);
-    debug("start timer session data:", sessionData);
+    debug("start timer session data:", sessionData?.timerData?.interval);
     const updateIntervalMS = 500;
 
     if (sessionData.timerData.interval) {
@@ -149,8 +149,6 @@ exports.startTimer = async (req, res, next) => {
 
 exports.stopTimer = async (req, res, next) => {
     const { signal } = req.body;
-    debug("stopper sessionId:", sessionID);
-
     const sessionData = getActiveRoundData(req.sessionID);
 
     if (!sessionData?.timerData) {
@@ -159,10 +157,13 @@ exports.stopTimer = async (req, res, next) => {
 
     if (signal === "stop") {
         sessionData.timerData.signal = signal;
+        sessionData.timerData.finalTime = sessionData.timerData.time;
         clearInterval(sessionData.timerData.interval);
         sessionData.timerData.interval = null; 
+        debug('final time for this round:', sessionData.timerData.finalTime)
         return res.status(200).json({ message: "Signal set to stop" });
     }
+
     return res.status(400).json({ message: "Invalid signal" });
 };
 
@@ -244,7 +245,7 @@ function setActiveRound(sessionID, imageId) {
         userData.set(sessionID, {
             [imageId]: {
                 active: true,
-                timerData: { signal: null, time: 0, interval: null },
+                timerData: { signal: null, time: 0, interval: null, finalTime: null },
                 riddles: {},
                 viewportDetails: null,
             },
