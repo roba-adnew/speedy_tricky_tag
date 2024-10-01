@@ -100,7 +100,7 @@ async function stopTimer() {
     try {
         const response = await fetch(url, options);
         const results = await response.json();
-        return results;
+        return results.finalTime;
     } catch (err) {
         console.error("timer commencement error:", err);
         throw err;
@@ -128,7 +128,6 @@ async function getTime() {
 async function checkTag(riddle, tag) {
     const url = `${base_url}/check-tag`;
     const body = { riddle: riddle, tag: tag };
-    console.log('req body to send', body)
 
     const options = {
         method: "POST",

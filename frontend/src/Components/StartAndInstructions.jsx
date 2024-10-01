@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { getImageSetMeta as apiGetImageSetMeta } from "../utils/api";
+import {
+    getImageSetMeta as apiGetImageSetMeta,
+} from "../utils/api";
 import { useNavigate } from "react-router-dom";
 
 function StartAndInstructions() {
@@ -8,6 +10,7 @@ function StartAndInstructions() {
 
     useEffect(() => {
         async function getImageSet() {
+            //await apiClearData();
             const imageSet = await apiGetImageSetMeta();
             setImageIds(imageSet);
         }

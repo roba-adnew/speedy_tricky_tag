@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import {
     getImageDetails as apiGetImage,
-    startTimer as apiStartTimer,
     sendViewportDetails as apiSendViewportDetails,
     checkTag as apiCheckTag,
 } from "../utils/api";
@@ -10,6 +9,8 @@ import Timer from "./Timer";
 import "../Styles/ImageViewer.css";
 
 function ImageViewer() {
+    const [isLoading, setIsLoading] = useState(true);
+
     const [imageIdsIndex, setImageIdIndex] = useState(0);
 
     const [playerCorrect, setPlayerCorrect] = useState(null);
@@ -17,13 +18,12 @@ function ImageViewer() {
     const [isRunning, setIsRunning] = useState(false);
 
     const [selectedRiddle, setSelectedRiddle] = useState(null);
-
-    const [isLoading, setIsLoading] = useState(true);
     const [image, setImage] = useState(null);
     const [riddles, setRiddles] = useState(null);
     const [isTagging, setIsTagging] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
     const [tagFlag, setTagFlag] = useState(false);
+
     const imageRef = useRef(null);
     const location = useLocation();
     const imageIds = location.state?.imageIds;
@@ -32,15 +32,17 @@ function ImageViewer() {
 
     useEffect(() => {
         async function getFile() {
+            setPlayerCorrect(null)
+            setPlayerWon(null);
             const fileObject = await apiGetImage(imageIds[imageIdsIndex]);
             const imageFile = fileObject.content;
             setImage(imageFile);
 
             const imageRiddles = fileObject.details;
+            console.log('riddles from api', imageRiddles)
             setRiddles(imageRiddles);
 
             setIsLoading(false);
-            await apiStartTimer();
             setIsRunning(true);
         }
         getFile();
@@ -54,7 +56,6 @@ function ImageViewer() {
             const xOffset = imageRef.current.x;
             const yOffset = imageRef.current.y;
             const viewportDetails = { scalingFactor, xOffset, yOffset };
-            console.log("viewport details:", viewportDetails);
             await apiSendViewportDetails(viewportDetails);
         }
         sendViewportDetails();
@@ -66,6 +67,12 @@ function ImageViewer() {
 
     if (!isLoading && !image) {
         return <div>No file data available</div>;
+    }
+
+    function selectRiddle(e) {
+        const selectedRiddle = e.target.id;
+        if (tagFlag) setTagFlag(false);
+        setSelectedRiddle(selectedRiddle);
     }
 
     function toggleTagging() {
@@ -88,11 +95,7 @@ function ImageViewer() {
 
     async function handleTagSubmission(e) {
         e.preventDefault();
-        console.log(riddles[selectedRiddle]);
-        console.log("selected riddle at tag:", selectedRiddle),
-            console.log("tag at validation", tag);
         const results = await apiCheckTag(selectedRiddle, tag);
-        console.log("correctness:", results);
         if (results.correct) {
             const updatedRiddles = {
                 ...riddles,
@@ -105,23 +108,20 @@ function ImageViewer() {
             setRiddles(updatedRiddles);
             setSelectedRiddle(null);
             setPlayerCorrect(true);
+            toggleTagging();
+
             if (results.roundCompleted) {
+                console.log("won the round!");
                 setIsRunning(false);
                 setPlayerWon(true);
                 setImageIdIndex((prevIndex) => prevIndex + 1);
+                setPlayerCorrect(false);
             }
-            toggleTagging();
             return;
         }
         setPlayerCorrect(false);
         toggleTagging();
         return;
-    }
-
-    function selectRiddle(e) {
-        const selectedRiddle = e.target.id;
-        if (tagFlag) setTagFlag(false);
-        setSelectedRiddle(selectedRiddle);
     }
 
     return (
@@ -148,11 +148,12 @@ function ImageViewer() {
                     You have to select a riddle first
                 </div>
             )}
-            <Timer isRunning={isRunning} playerWon={playerWon} />
+
+            <Timer isRunning={isRunning} playerWon={playerWon} imageIdsIndex={imageIdsIndex}/>
 
             {Object.keys(riddles).map((riddle, i) => {
                 return (
-                    <>
+                    <div key={riddle}>
                         {riddles[riddle]?.answered && (
                             <div
                                 key={`${riddle}-answer-marker`}
@@ -173,7 +174,7 @@ function ImageViewer() {
                             </div>
                         )}
                         <p
-                            key={riddle}
+                            key={`${riddle}-question`}
                             id={riddle}
                             style={{
                                 border: riddles[riddle]?.answered
@@ -188,17 +189,15 @@ function ImageViewer() {
                         >
                             {`${i + 1}. ${riddles[riddle].question}`}
                         </p>
-                    </>
+                    </div>
                 );
             })}
 
-            {isRunning && playerCorrect && (
-                <div>
-                    NOICE! Got that one right!
-                </div>
+            {isRunning && playerCorrect === true && (
+                <div>NOICE! Got that one right!</div>
             )}
 
-            {isRunning && !playerCorrect && (
+            {isRunning && playerCorrect === false && (
                 <div>
                     sorry, you got it wrong, but keep going, time is ticking!
                 </div>

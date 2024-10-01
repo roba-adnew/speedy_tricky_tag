@@ -9,6 +9,7 @@ const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 const userData = new Map();
 
 exports.getImageIds = async (req, res, next) => {
+    userData.delete(req.sessionID);
     try {
         const imageIds = await prisma.image.findMany({
             select: {
@@ -23,7 +24,7 @@ exports.getImageIds = async (req, res, next) => {
 };
 
 exports.downloadImage = async (req, res, next) => {
-    debug("image request body: %O", req.body.imageId);
+    debug("imageId download request: %O", req.body.imageId);
     const { imageId } = req.body;
 
     if (!imageId) {
@@ -69,7 +70,7 @@ exports.downloadImage = async (req, res, next) => {
 };
 
 exports.getImageMeta = async (req, res, next) => {
-    debug("image request body: %O", req.body);
+    debug("imageId meta request : %O", req.body.imageId);
     const { imageId } = req.body;
 
     if (!imageId) {
@@ -78,7 +79,7 @@ exports.getImageMeta = async (req, res, next) => {
 
     try {
         const imageMeta = await prisma.image.findFirst({
-            where: { id: imageId.id },
+            where: { id: imageId },
             select: {
                 riddle1: true,
                 riddle2: true,
@@ -131,7 +132,7 @@ exports.startTimer = async (req, res, next) => {
     const updateIntervalMS = 500;
 
     if (sessionData.timerData.interval) {
-        debug("Timer is already running for this session.");
+        debug("Timer is already running for this round.");
         return res.status(200).json({ message: "Timer is already running" });
     }
 
@@ -159,9 +160,12 @@ exports.stopTimer = async (req, res, next) => {
         sessionData.timerData.signal = signal;
         sessionData.timerData.finalTime = sessionData.timerData.time;
         clearInterval(sessionData.timerData.interval);
-        sessionData.timerData.interval = null; 
-        debug('final time for this round:', sessionData.timerData.finalTime)
-        return res.status(200).json({ message: "Signal set to stop" });
+        sessionData.timerData.interval = null;
+        debug("final time for this round:", sessionData.timerData.finalTime);
+        return res.status(200).json({
+            finalTime: sessionData.timerData.finalTime,
+            message: "Signal set to stop",
+        });
     }
 
     return res.status(400).json({ message: "Invalid signal" });
@@ -236,21 +240,34 @@ function checkRoundCompleted(sessionID) {
         (riddle) => sessionData.riddles[riddle].answered
     );
     const roundCompleted = answeredFlags.every(isCorrect);
-    debug("answered flags after checking:", answeredFlags);
+    if (roundCompleted) sessionData.active = false;
     return roundCompleted;
 }
 
 function setActiveRound(sessionID, imageId) {
-    if (!userData.has(sessionID)) {
+    const gameData = userData.get(sessionID);
+    if (!gameData) {
         userData.set(sessionID, {
             [imageId]: {
                 active: true,
-                timerData: { signal: null, time: 0, interval: null, finalTime: null },
+                timerData: {
+                    signal: null,
+                    time: 0,
+                    interval: null,
+                    finalTime: null,
+                },
                 riddles: {},
                 viewportDetails: null,
             },
         });
+        return;
     }
+    gameData[imageId] = {
+        active: true,
+        timerData: { signal: null, time: 0, interval: null, finalTime: null },
+        riddles: {},
+        viewportDetails: null,
+    };
 }
 
 function getActiveRoundData(sessionID) {
@@ -261,12 +278,14 @@ function getActiveRoundData(sessionID) {
     const gameData = userData.get(sessionID);
     const imageIds = Object.keys(gameData);
 
-    const activeImageId = imageIds.filter((imageId) => gameData[imageId].active
+    const activeImageId = imageIds.filter(
+        (imageId) => gameData[imageId].active
     );
 
     if (activeImageId.length > 1) {
         debug("there is more than one active round");
         return;
     }
+    debug("active image:", activeImageId[0]);
     return gameData[activeImageId[0]];
 }

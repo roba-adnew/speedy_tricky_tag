@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { stopTimer as apiStopTimer, getTime as apiGetTime } from "../utils/api";
+import {
+    startTimer as apiStartTimer,
+    stopTimer as apiStopTimer,
+    getTime as apiGetTime,
+} from "../utils/api";
 
 function formattedTime(timeMS) {
     const totalSeconds = timeMS / 1000; // time in API in MS;
@@ -18,6 +22,13 @@ function formattedTime(timeMS) {
 function Timer({ isRunning, playerWon }) {
     const [time, setTime] = useState(0);
     const [successTime, setSuccessTime] = useState(0);
+
+    useEffect(() => {
+        async function startTime() {
+            await apiStartTimer();
+        }
+        if (isRunning) startTime();
+    }, [isRunning]);
 
     useEffect(() => {
         async function fetchTime() {
@@ -40,15 +51,16 @@ function Timer({ isRunning, playerWon }) {
                 clearInterval(interval);
             }
         };
+        
     }, [isRunning]);
 
     useEffect(() => {
         async function stopRound() {
-            await apiStopTimer();
-            setSuccessTime(time);
+            const finalTime = await apiStopTimer();
+            setSuccessTime(finalTime);
         }
         if (playerWon) stopRound();
-    }, [time, playerWon]);
+    }, [playerWon]);
 
     return (
         <>
