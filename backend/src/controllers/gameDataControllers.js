@@ -178,18 +178,21 @@ function stopTimer(sessionID) {
 
 function scaleTargets(sessionID) {
     const roundData = getActiveRoundData(sessionID);
-    const { scalingFactor, xOffset, yOffset } = roundData.viewportDetails;
+    const { scaler, xOffset, yOffset } = roundData.viewportDetails;
     const riddleKeys = Object.keys(roundData.riddles);
     riddleKeys.forEach((riddle) => {
         roundData.riddles[riddle].scaledTargets = roundData.riddles[
             riddle
         ].targets.map((target) =>
             target.map((coord) => ({
-                x: scalingFactor * (coord.x + xOffset),
-                y: scalingFactor * (coord.y + yOffset),
+                x: scaler * (coord.x + xOffset),
+                y: scaler * (coord.y + yOffset),
             }))
         );
+        debug(`scaled target for ${riddle}`, roundData.riddles[riddle].scaledTargets)
+
     });
+
 }
 
 function validateTag(sessionID, riddle, tag) {

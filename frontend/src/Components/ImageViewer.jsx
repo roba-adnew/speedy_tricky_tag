@@ -25,11 +25,11 @@ function ImageViewer() {
     const [tag, setTag] = useState({ x: 0, y: 0 });
     const [tagFlag, setTagFlag] = useState(false);
 
+    const [vpDetails, setVpDetails] = useState(null);
+
     const imageRef = useRef(null);
     const location = useLocation();
     const imageIds = location.state?.imageIds;
-
-    useEffect(() => {});
 
     useEffect(() => {
         async function getFile() {
@@ -40,7 +40,6 @@ function ImageViewer() {
             setImage(imageFile);
 
             const imageRiddles = fileObject.details;
-            console.log("riddles from api", imageRiddles);
             setRiddles(imageRiddles);
 
             setIsLoading(false);
@@ -49,18 +48,44 @@ function ImageViewer() {
         getFile();
     }, [imageIds, imageIdsIndex]);
 
+    function getViewportDetails() {
+        if (!imageRef?.current) return;
+        const scaler = imageRef.current.height / imageRef.current.naturalHeight;
+        const { x: xOffset, y: yOffset } =
+            imageRef.current.getBoundingClientRect();
+        const viewportDetails = { scaler, xOffset, yOffset };
+        setVpDetails(viewportDetails);
+    }
+
+    useEffect(() => {
+        getViewportDetails();
+    }, [image]);
+
+    useEffect(() => {
+        let resizeTimer;
+        function handleResize() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                getViewportDetails();
+            }, 500);
+        }
+
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+            clearTimeout(resizeTimer);
+        };
+    }, []);
+
+    console.log("vp details", vpDetails);
+
     useEffect(() => {
         async function sendViewportDetails() {
             if (!imageRef?.current) return;
-            const scalingFactor =
-                imageRef.current.height / imageRef.current.naturalHeight;
-            const xOffset = imageRef.current.x;
-            const yOffset = imageRef.current.y;
-            const viewportDetails = { scalingFactor, xOffset, yOffset };
-            await apiSendViewportDetails(viewportDetails);
+            await apiSendViewportDetails(vpDetails);
         }
         sendViewportDetails();
-    }, [image]);
+    }, [image, vpDetails]);
 
     if (isLoading) {
         return <div>getting the game ready!</div>;
@@ -116,7 +141,7 @@ function ImageViewer() {
 
             if (roundResults.roundCompleted) {
                 console.log("won the round!");
-                setSuccessTime(roundResults.finalTime)
+                setSuccessTime(roundResults.finalTime);
                 setIsRunning(false);
                 setPlayerWon(true);
                 setImageIdIndex((prevIndex) => prevIndex + 1);
@@ -136,10 +161,12 @@ function ImageViewer() {
                 src={image}
                 alt="Intersection"
                 onClick={tagTarget}
+                onLoad={getViewportDetails}
                 ref={imageRef}
             />
             {tagFlag && (
                 <div
+                    className="unselectedTag"
                     style={{
                         border: "1px solid black",
                         backgroundColor: "pink",
