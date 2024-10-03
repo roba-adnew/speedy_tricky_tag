@@ -32,7 +32,7 @@ function ImageViewer() {
     const imageIds = location.state?.imageIds;
 
     useEffect(() => {
-        async function getFile() {
+        async function getRoundMeta() {
             setPlayerCorrect(null);
             setPlayerWon(null);
             const fileObject = await apiGetImage(imageIds[imageIdsIndex]);
@@ -45,7 +45,7 @@ function ImageViewer() {
             setIsLoading(false);
             setIsRunning(true);
         }
-        getFile();
+        getRoundMeta();
     }, [imageIds, imageIdsIndex]);
 
     function getViewportDetails() {
@@ -121,10 +121,13 @@ function ImageViewer() {
 
     async function handleTagSubmission(e) {
         e.preventDefault();
+        console.log('trying to tag before the api call', selectedRiddle, tag)
+
         const { correct, roundResults } = await apiCheckTag(
             selectedRiddle,
             tag
         );
+        console.log('trying to tag after the api call')
         if (correct) {
             const updatedRiddles = {
                 ...riddles,
@@ -137,7 +140,6 @@ function ImageViewer() {
             setRiddles(updatedRiddles);
             setSelectedRiddle(null);
             setPlayerCorrect(true);
-            toggleTagging();
 
             if (roundResults.roundCompleted) {
                 console.log("won the round!");
@@ -147,6 +149,8 @@ function ImageViewer() {
                 setImageIdIndex((prevIndex) => prevIndex + 1);
                 setPlayerCorrect(false);
             }
+            toggleTagging();
+
             return;
         }
         setPlayerCorrect(false);

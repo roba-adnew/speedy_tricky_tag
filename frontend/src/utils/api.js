@@ -69,7 +69,6 @@ async function sendViewportDetails(viewportDetails) {
     }
 }
 
-
 async function getTime() {
     const url = `${base_url}/get-time`;
 
@@ -101,11 +100,14 @@ async function checkTag(riddle, tag) {
 
     try {
         const response = await fetch(url, options);
+        console.log("inside the api call try block but after the api call");
         const results = await response.json();
         return results;
     } catch (err) {
         console.error("tag check error:", err);
         throw err;
+    } finally {
+        console.log('exiting check tag function')
     }
 }
 

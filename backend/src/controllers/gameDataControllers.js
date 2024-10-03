@@ -116,6 +116,7 @@ exports.getImageMeta = async (req, res, next) => {
 };
 
 exports.receiveViewportDetails = (req, res, next) => {
+    debug('inside of receiveViewportDetails')
     if (!req.body.viewportDetails) {
         res.status(400).json({ message: "details were not received" });
     }
@@ -124,7 +125,7 @@ exports.receiveViewportDetails = (req, res, next) => {
     debug("viewport:", roundData.viewportDetails);
 
     scaleTargets(req.sessionID);
-    res.status(201);
+    return res.sendStatus(200);
 };
 
 exports.getTime = (req, res, next) => {
@@ -140,6 +141,8 @@ exports.getTime = (req, res, next) => {
 };
 
 exports.checkTag = (req, res, next) => {
+    debug('inside of checkTag')
+
     const { riddle, tag } = req.body;
     const sessionData = getActiveRoundData(req.sessionID);
     const correct = validateTag(req.sessionID, riddle, tag);
@@ -189,10 +192,8 @@ function scaleTargets(sessionID) {
                 y: scaler * (coord.y + yOffset),
             }))
         );
-        debug(`scaled target for ${riddle}`, roundData.riddles[riddle].scaledTargets)
-
     });
-
+    return
 }
 
 function validateTag(sessionID, riddle, tag) {
