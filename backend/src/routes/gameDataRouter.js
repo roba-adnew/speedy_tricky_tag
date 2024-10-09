@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const gameDataController = require("../controllers/gameDataControllers");
+const gameDataController = require("../controllers/gameDataController");
 
 router.post("/image-set", gameDataController.getImageIds);
 

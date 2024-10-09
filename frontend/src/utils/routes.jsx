@@ -1,6 +1,7 @@
 import App from "../App";
 import StartAndInstructions from "../Components/StartAndInstructions";
 import ImageViewer from "../Components/ImageViewer";
+import GameEnd from "../Components/Scoreboard";
 
 const routes = [
     {
@@ -14,6 +15,10 @@ const routes = [
             {
                 path: "/game",
                 element: <ImageViewer />,
+            },
+            {
+                path: "/scoreboard",
+                element: <GameEnd />,
             },
         ],
     },

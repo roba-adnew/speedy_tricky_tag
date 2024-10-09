@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { getTime as apiGetTime } from "../utils/api";
+import { getTime as apiGetTime } from "../utils/gamePlayApi";
 import { formattedTime } from "../utils/functions";
 
 function Timer({ isRunning }) {
@@ -29,12 +29,7 @@ function Timer({ isRunning }) {
         };
     }, [isRunning]);
 
-    return (
-        <>
-            {isRunning && <div>{formattedTime(time)}</div>}
-            
-        </>
-    );
+    return <>{isRunning && <div>{formattedTime(time)}</div>}</>;
 }
 
 Timer.propTypes = {

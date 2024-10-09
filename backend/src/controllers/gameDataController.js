@@ -31,7 +31,6 @@ exports.downloadImage = async (req, res, next) => {
         return res.status(400).json({ error: "Image name is required" });
     }
 
-    setActiveRound(req.sessionID, imageId);
     try {
         const results = await prisma.image.findFirst({
             where: { id: imageId },
@@ -41,6 +40,7 @@ exports.downloadImage = async (req, res, next) => {
         });
 
         debug("queried name:", results.name);
+        setActiveRound(req.sessionID, results.name);
 
         const { data, error } = await supabase.storage
             .from("images")
@@ -134,17 +134,6 @@ exports.getTime = (req, res, next) => {
     res.json({ time: sessionData.timerData.time });
 };
 
-exports.checkTag = (req, res, next) => {
-    const { riddle, tag } = req.body;
-    const sessionData = getActiveRoundData(req.sessionID);
-    const correct = validateTag(req.sessionID, riddle, tag);
-    if (correct) sessionData.riddles[riddle].answered = true;
-    const roundResults = checkRoundResults(req.sessionID);
-    return res
-        .status(200)
-        .json({ correct: correct, roundResults: roundResults });
-};
-
 function startTimer(sessionID) {
     const sessionData = getActiveRoundData(sessionID);
     const updateIntervalMS = 1000;
@@ -187,6 +176,25 @@ function scaleTargets(sessionID) {
     return;
 }
 
+exports.checkTag = (req, res, next) => {
+    const { riddle, tag } = req.body;
+    const sessionData = getActiveRoundData(req.sessionID);
+    const correct = validateTag(req.sessionID, riddle, tag);
+    if (correct) sessionData.riddles[riddle].answered = true;
+    const roundResults = checkRoundResults(req.sessionID);
+    return res
+        .status(200)
+        .json({ correct: correct, roundResults: roundResults });
+};
+
+exports.getPlayerData = (sessionID) => {
+    if (!userData.has(sessionID)) {
+        debug("no user data for this sessionID");
+        return;
+    }
+    return userData.get(sessionID);
+};
+
 function validateTag(sessionID, riddle, tag) {
     let isInside = false;
     const sessionData = getActiveRoundData(sessionID);
@@ -223,43 +231,17 @@ function checkRoundResults(sessionID) {
         (riddle) => sessionData.riddles[riddle].answered
     );
     roundResults.roundCompleted = answeredFlags.every(isCorrect);
-    debug('answered flags:', answeredFlags);
-    debug('round completed:', roundResults.roundCompleted)
+    debug("answered flags:", answeredFlags);
+    debug("round completed:", roundResults.roundCompleted);
 
     if (roundResults.roundCompleted) {
         stopTimer(sessionID);
         sessionData.active = false;
-        sessionData.timerData.finalTime = roundResults.finalTime = sessionData.timerData.time;
+        roundResults.finalTime = sessionData.timerData.time;
         debug("final time for this round:", roundResults.finalTime);
     }
 
     return roundResults;
-}
-
-function setActiveRound(sessionID, imageId) {
-    const gameData = userData.get(sessionID);
-    if (!gameData) {
-        userData.set(sessionID, {
-            [imageId]: {
-                active: true,
-                timerData: {
-                    signal: null,
-                    time: 0,
-                    interval: null,
-                    finalTime: null,
-                },
-                riddles: {},
-                viewportDetails: null,
-            },
-        });
-        return;
-    }
-    gameData[imageId] = {
-        active: true,
-        timerData: { signal: null, time: 0, interval: null, finalTime: null },
-        riddles: {},
-        viewportDetails: null,
-    };
 }
 
 function getActiveRoundData(sessionID) {
@@ -279,4 +261,29 @@ function getActiveRoundData(sessionID) {
         return;
     }
     return gameData[activeImageId[0]];
+}
+
+function setActiveRound(sessionID, imageName) {
+    const gameData = userData.get(sessionID);
+    if (!gameData) {
+        userData.set(sessionID, {
+            [imageName]: {
+                active: true,
+                timerData: {
+                    signal: null,
+                    time: 0,
+                    interval: null,
+                },
+                riddles: {},
+                viewportDetails: null,
+            },
+        });
+        return;
+    }
+    gameData[imageName] = {
+        active: true,
+        timerData: { signal: null, time: 0, interval: null },
+        riddles: {},
+        viewportDetails: null,
+    };
 }

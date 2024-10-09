@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
     getImageDetails as apiGetImage,
     sendViewportDetails as apiSendViewportDetails,
     checkTag as apiCheckTag,
-} from "../utils/api";
+} from "../utils/gamePlayApi";
 import Timer from "./Timer";
 import "../Styles/ImageViewer.css";
 import { formattedTime } from "../utils/functions";
@@ -29,6 +29,7 @@ function ImageViewer() {
 
     const imageRef = useRef(null);
     const location = useLocation();
+    const navigate = useNavigate();
     const imageIds = location.state?.imageIds;
 
     useEffect(() => {
@@ -52,7 +53,6 @@ function ImageViewer() {
         getViewportDetails();
     }, [image]);
 
-
     useEffect(() => {
         let resizeTimer;
         function handleResize() {
@@ -72,24 +72,11 @@ function ImageViewer() {
     useEffect(() => {
         async function sendViewportDetails() {
             if (!imageRef?.current) return;
+            console.log(vpDetails);
             await apiSendViewportDetails(vpDetails);
         }
         sendViewportDetails();
     }, [image, vpDetails]);
-
-    //console.log("vp details", vpDetails);
-
-    if (isLoading && !playerWon) {
-        return <div>getting the game ready!</div>;
-    }
-
-    if (isLoading && playerWon) {
-        return <div>Well done, you finshed the last round in {formattedTime(successTime)}getting the next round ready</div>;
-    }
-
-    if (!isLoading && !image) {
-        return <div>No file data available</div>;
-    }
 
     function getViewportDetails() {
         if (!imageRef?.current) return;
@@ -99,7 +86,6 @@ function ImageViewer() {
         const { x: xOffset, y: yOffset } =
             imageRef.current.getBoundingClientRect();
         const viewportDetails = { scalerX, scalerY, xOffset, yOffset };
-        console.log(viewportDetails);
         setVpDetails(viewportDetails);
         return viewportDetails;
     }
@@ -153,6 +139,9 @@ function ImageViewer() {
                 setSuccessTime(roundResults.finalTime);
                 setIsRunning(false);
                 setPlayerWon(true);
+                if (imageIdsIndex === imageIds.length - 1) {
+                    navigate("/scoreboard");
+                }
                 setImageIdIndex((prevIndex) => prevIndex + 1);
             }
             toggleTagging();
@@ -162,6 +151,28 @@ function ImageViewer() {
         setPlayerCorrect(false);
         toggleTagging();
         return;
+    }
+
+    if (isLoading && !playerWon) {
+        return <div>getting the game ready!</div>;
+    }
+
+    if (isLoading && playerWon) {
+        return (
+            <div>
+                Well done, you finished the last round in{" "}
+                {formattedTime(successTime)}! getting the next round ready
+            </div>
+        );
+    }
+
+    if (!isLoading && !image) {
+        return (
+            <div>
+                ther&apos;s been an issue, please go back to the home page and
+                try starting the game again
+            </div>
+        );
     }
 
     return (

@@ -8,8 +8,8 @@ const cookieParser = require("cookie-parser");
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
 const { PrismaClient } = require("@prisma/client");
 
-// add in routers
 const gameDataRouter = require("./src/routes/gameDataRouter");
+const scoresRouter = require("./src/routes/scoresRouter");
 
 const allowedOrigins = [
     "https://speedy-tricky-tag.vercel.app",
@@ -57,8 +57,8 @@ app.use(
 );
 app.use(cookieParser());
 
-// add in routers into app
 app.use("/images", gameDataRouter);
+app.use("/scores", scoresRouter);
 
 app.get("/", (req, res, next) => {
     res.send("<h1>we made it</h1>");

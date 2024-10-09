@@ -11,4 +11,8 @@ function formattedTime(timeMS) {
     return displayTime;
 }
 
-export { formattedTime };
+function formattedName(name) {
+    return name.replaceAll("_", " ").slice(0, name.length - 4);
+}
+
+export { formattedTime, formattedName };
