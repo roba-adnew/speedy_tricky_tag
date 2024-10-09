@@ -53,10 +53,6 @@ exports.downloadImage = async (req, res, next) => {
 
         const fileBuffer = Buffer.from(await data.arrayBuffer());
 
-        debug("sb data raw:%O", data);
-        debug("buffer from file object:%O", fileBuffer);
-        debug("type:", data.type);
-
         res.setHeader("Content-Type", data.type);
         res.setHeader(
             "Content-Disposition",
@@ -116,13 +112,11 @@ exports.getImageMeta = async (req, res, next) => {
 };
 
 exports.receiveViewportDetails = (req, res, next) => {
-    debug('inside of receiveViewportDetails')
     if (!req.body.viewportDetails) {
         res.status(400).json({ message: "details were not received" });
     }
     const roundData = getActiveRoundData(req.sessionID);
     roundData.viewportDetails = req.body.viewportDetails;
-    debug("viewport:", roundData.viewportDetails);
 
     scaleTargets(req.sessionID);
     return res.sendStatus(200);
@@ -141,8 +135,6 @@ exports.getTime = (req, res, next) => {
 };
 
 exports.checkTag = (req, res, next) => {
-    debug('inside of checkTag')
-
     const { riddle, tag } = req.body;
     const sessionData = getActiveRoundData(req.sessionID);
     const correct = validateTag(req.sessionID, riddle, tag);
@@ -155,12 +147,11 @@ exports.checkTag = (req, res, next) => {
 
 function startTimer(sessionID) {
     const sessionData = getActiveRoundData(sessionID);
-    debug("start timer session data:", sessionData?.timerData?.interval);
     const updateIntervalMS = 1000;
 
     if (sessionData.timerData.interval) {
         debug("Timer is already running for this round.");
-        return
+        return;
     }
 
     sessionData.timerData.interval = setInterval(() => {
@@ -174,14 +165,14 @@ function startTimer(sessionID) {
 }
 
 function stopTimer(sessionID) {
-    const sessionData = getActiveRoundData(sessionID)
+    const sessionData = getActiveRoundData(sessionID);
     clearInterval(sessionData.timerData.interval);
     sessionData.timerData.interval = null;
 }
 
 function scaleTargets(sessionID) {
     const roundData = getActiveRoundData(sessionID);
-    const { scaler, xOffset, yOffset } = roundData.viewportDetails;
+    const { scalerX: scaler, xOffset, yOffset } = roundData.viewportDetails;
     const riddleKeys = Object.keys(roundData.riddles);
     riddleKeys.forEach((riddle) => {
         roundData.riddles[riddle].scaledTargets = roundData.riddles[
@@ -193,7 +184,7 @@ function scaleTargets(sessionID) {
             }))
         );
     });
-    return
+    return;
 }
 
 function validateTag(sessionID, riddle, tag) {
@@ -232,12 +223,14 @@ function checkRoundResults(sessionID) {
         (riddle) => sessionData.riddles[riddle].answered
     );
     roundResults.roundCompleted = answeredFlags.every(isCorrect);
+    debug('answered flags:', answeredFlags);
+    debug('round completed:', roundResults.roundCompleted)
 
     if (roundResults.roundCompleted) {
-        const finalTime = stopTimer(sessionID);
+        stopTimer(sessionID);
         sessionData.active = false;
-        sessionData.timerData.finalTime = roundResults.finalTime = finalTime;
-        debug("final time for this round:", sessionData.timerData.finalTime);
+        sessionData.timerData.finalTime = roundResults.finalTime = sessionData.timerData.time;
+        debug("final time for this round:", roundResults.finalTime);
     }
 
     return roundResults;

@@ -1,21 +1,9 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { getTime as apiGetTime } from "../utils/api";
+import { formattedTime } from "../utils/functions";
 
-function formattedTime(timeMS) {
-    const totalSeconds = timeMS / 1000; // time in API in MS;
-
-    const minutes = Math.floor(totalSeconds / 60);
-    const displayMinutes = `${minutes.toString().padStart(1, "0")}`;
-
-    const seconds = Math.floor(totalSeconds % 60);
-    const displaySeconds = `${seconds.toString().padStart(2, "0")}`;
-
-    const displayTime = `${displayMinutes}:${displaySeconds}`;
-    return displayTime;
-}
-
-function Timer({ isRunning, playerWon, successTime }) {
+function Timer({ isRunning }) {
     const [time, setTime] = useState(0);
 
     useEffect(() => {
@@ -44,19 +32,13 @@ function Timer({ isRunning, playerWon, successTime }) {
     return (
         <>
             {isRunning && <div>{formattedTime(time)}</div>}
-            {playerWon && (
-                <div>
-                    You got them all right in {formattedTime(successTime)}!
-                </div>
-            )}
+            
         </>
     );
 }
 
 Timer.propTypes = {
     isRunning: PropTypes.bool,
-    playerWon: PropTypes.bool,
-    successTime: PropTypes.number,
 };
 
 export default Timer;

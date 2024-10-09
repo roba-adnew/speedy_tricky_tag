@@ -7,16 +7,16 @@ import {
 } from "../utils/api";
 import Timer from "./Timer";
 import "../Styles/ImageViewer.css";
+import { formattedTime } from "../utils/functions";
 
 function ImageViewer() {
-    const [isLoading, setIsLoading] = useState(true);
-
     const [imageIdsIndex, setImageIdIndex] = useState(0);
 
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRunning, setIsRunning] = useState(false);
     const [playerCorrect, setPlayerCorrect] = useState(null);
     const [playerWon, setPlayerWon] = useState(null);
     const [successTime, setSuccessTime] = useState(null);
-    const [isRunning, setIsRunning] = useState(false);
 
     const [selectedRiddle, setSelectedRiddle] = useState(null);
     const [image, setImage] = useState(null);
@@ -33,33 +33,25 @@ function ImageViewer() {
 
     useEffect(() => {
         async function getRoundMeta() {
-            setPlayerCorrect(null);
-            setPlayerWon(null);
+            setIsLoading(true);
             const fileObject = await apiGetImage(imageIds[imageIdsIndex]);
             const imageFile = fileObject.content;
-            setImage(imageFile);
-
             const imageRiddles = fileObject.details;
+            setImage(imageFile);
             setRiddles(imageRiddles);
 
             setIsLoading(false);
             setIsRunning(true);
+            setPlayerCorrect(null);
+            setPlayerWon(null);
         }
         getRoundMeta();
     }, [imageIds, imageIdsIndex]);
 
-    function getViewportDetails() {
-        if (!imageRef?.current) return;
-        const scaler = imageRef.current.height / imageRef.current.naturalHeight;
-        const { x: xOffset, y: yOffset } =
-            imageRef.current.getBoundingClientRect();
-        const viewportDetails = { scaler, xOffset, yOffset };
-        setVpDetails(viewportDetails);
-    }
-
     useEffect(() => {
         getViewportDetails();
     }, [image]);
+
 
     useEffect(() => {
         let resizeTimer;
@@ -77,8 +69,6 @@ function ImageViewer() {
         };
     }, []);
 
-    console.log("vp details", vpDetails);
-
     useEffect(() => {
         async function sendViewportDetails() {
             if (!imageRef?.current) return;
@@ -87,12 +77,31 @@ function ImageViewer() {
         sendViewportDetails();
     }, [image, vpDetails]);
 
-    if (isLoading) {
+    //console.log("vp details", vpDetails);
+
+    if (isLoading && !playerWon) {
         return <div>getting the game ready!</div>;
+    }
+
+    if (isLoading && playerWon) {
+        return <div>Well done, you finshed the last round in {formattedTime(successTime)}getting the next round ready</div>;
     }
 
     if (!isLoading && !image) {
         return <div>No file data available</div>;
+    }
+
+    function getViewportDetails() {
+        if (!imageRef?.current) return;
+        const scalerX = imageRef.current.width / imageRef.current.naturalWidth;
+        const scalerY =
+            imageRef.current.height / imageRef.current.naturalHeight;
+        const { x: xOffset, y: yOffset } =
+            imageRef.current.getBoundingClientRect();
+        const viewportDetails = { scalerX, scalerY, xOffset, yOffset };
+        console.log(viewportDetails);
+        setVpDetails(viewportDetails);
+        return viewportDetails;
     }
 
     function selectRiddle(e) {
@@ -121,13 +130,12 @@ function ImageViewer() {
 
     async function handleTagSubmission(e) {
         e.preventDefault();
-        console.log('trying to tag before the api call', selectedRiddle, tag)
 
         const { correct, roundResults } = await apiCheckTag(
             selectedRiddle,
             tag
         );
-        console.log('trying to tag after the api call')
+
         if (correct) {
             const updatedRiddles = {
                 ...riddles,
@@ -142,12 +150,10 @@ function ImageViewer() {
             setPlayerCorrect(true);
 
             if (roundResults.roundCompleted) {
-                console.log("won the round!");
                 setSuccessTime(roundResults.finalTime);
                 setIsRunning(false);
                 setPlayerWon(true);
                 setImageIdIndex((prevIndex) => prevIndex + 1);
-                setPlayerCorrect(false);
             }
             toggleTagging();
 
@@ -185,11 +191,21 @@ function ImageViewer() {
                 </div>
             )}
 
-            <Timer
-                isRunning={isRunning}
-                playerWon={playerWon}
-                successTime={successTime}
-            />
+            {playerWon && (
+                <div>ROUND COMPLETE! GETTING THE NEXT ONE READY!</div>
+            )}
+
+            {isRunning && playerCorrect === true && (
+                <div>NOICE! Got that one right!</div>
+            )}
+
+            {isRunning && playerCorrect === false && (
+                <div>
+                    sorry, you got it wrong, but keep going, time is ticking!
+                </div>
+            )}
+
+            <Timer isRunning={isRunning} />
 
             {Object.keys(riddles).map((riddle, i) => {
                 return (
@@ -199,8 +215,8 @@ function ImageViewer() {
                                 key={`${riddle}-answer-marker`}
                                 className="correctMarker"
                                 style={{
-                                    border: "3px solid white",
-                                    width: "10px",
+                                    border: "2px solid white",
+                                    width: "25px",
                                     borderRadius: "10px",
                                     textAlign: "center",
                                     position: "absolute",
@@ -210,7 +226,7 @@ function ImageViewer() {
                                     zIndex: 1000,
                                 }}
                             >
-                                {i + 1}
+                                &#10004;{i + 1}
                             </div>
                         )}
                         <p
@@ -232,16 +248,6 @@ function ImageViewer() {
                     </div>
                 );
             })}
-
-            {isRunning && playerCorrect === true && (
-                <div>NOICE! Got that one right!</div>
-            )}
-
-            {isRunning && playerCorrect === false && (
-                <div>
-                    sorry, you got it wrong, but keep going, time is ticking!
-                </div>
-            )}
 
             {isTagging && !tagFlag && (
                 <form

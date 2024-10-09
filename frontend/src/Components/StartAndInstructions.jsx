@@ -10,7 +10,6 @@ function StartAndInstructions() {
 
     useEffect(() => {
         async function getImageSet() {
-            //await apiClearData();
             const imageSet = await apiGetImageSetMeta();
             setImageIds(imageSet);
         }
