@@ -13,28 +13,31 @@ model Session {
     sid       String   @unique
     data      String
     expiresAt DateTime
+    scores    Score[]
 }
 
 model Image {
-    id             String  @id @default(uuid())
-    name           String
-    url            String
-    riddle1        Json
-    riddle2        Json
-    riddle3        Json
-    riddle4        Json
-    riddle5        Json
-    riddle6        Json
-    riddle7        Json
-    Scoreboard     Score[]
+    id      String @id @default(uuid())
+    name    String
+    url     String
+    riddle1 Json
+    riddle2 Json
+    riddle3 Json
+    riddle4 Json
+    riddle5 Json
+    riddle6 Json
+    riddle7 Json
 }
 
 model Score {
-    userId      String   @id @default(uuid())
-    userName    String
-    image       Image    @relation(fields: [imageId], references: [id])
-    imageId     String
-    startTime   DateTime
-    timeSeconds Float
-    score       Float
+    scoreId          String   @id @default(uuid())
+    scoreTs          DateTime
+    session          Session  @relation(fields: [sessionId], references: [id])
+    sessionId        String
+    gamerTag         String
+    busyBeachTime    Float
+    interscetionTime Float
+    fleaMarketTime   Float
+    totalTime        Float
+    score            Float
 }
