@@ -11,6 +11,7 @@ import { formattedTime } from "../utils/functions";
 
 function ImageViewer() {
     const [imageIdsIndex, setImageIdIndex] = useState(0);
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     const [isLoading, setIsLoading] = useState(true);
     const [isRunning, setIsRunning] = useState(false);
@@ -26,6 +27,7 @@ function ImageViewer() {
     const [tagFlag, setTagFlag] = useState(false);
 
     const [vpDetails, setVpDetails] = useState(null);
+    const [vpDetailsReady, setVpDetailsReady] = useState(false);
 
     const imageRef = useRef(null);
     const location = useLocation();
@@ -70,12 +72,23 @@ function ImageViewer() {
     }, []);
 
     useEffect(() => {
+        if (imageLoaded && vpDetails) {
+            setVpDetailsReady(true);
+        }
+    }, [imageLoaded, vpDetails]);
+
+    useEffect(() => {
         async function sendViewportDetails() {
-            if (!imageRef?.current) return;
-            await apiSendViewportDetails(vpDetails);
+            if (vpDetailsReady) {
+                try {
+                    await apiSendViewportDetails(vpDetails);
+                } catch (err) {
+                    console.error(err);
+                }
+            }
         }
         sendViewportDetails();
-    }, [image, vpDetails]);
+    }, [vpDetailsReady, vpDetails]);
 
     function getViewportDetails() {
         if (!imageRef?.current) return;
@@ -181,7 +194,10 @@ function ImageViewer() {
                 src={image}
                 alt="Intersection"
                 onClick={tagTarget}
-                onLoad={getViewportDetails}
+                onLoad={() => {
+                    getViewportDetails();
+                    setImageLoaded(true);
+                }}
                 ref={imageRef}
             />
             {tagFlag && (
