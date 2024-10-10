@@ -2,6 +2,7 @@ require("dotenv").config();
 const debug = require("debug")("backend:data");
 const { PrismaClient } = require("@prisma/client");
 const { createClient } = require("@supabase/supabase-js");
+const session = require("express-session");
 
 const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
@@ -187,14 +188,6 @@ exports.checkTag = (req, res, next) => {
         .json({ correct: correct, roundResults: roundResults });
 };
 
-exports.getPlayerData = (sessionID) => {
-    if (!userData.has(sessionID)) {
-        debug("no user data for this sessionID");
-        return;
-    }
-    return userData.get(sessionID);
-};
-
 function validateTag(sessionID, riddle, tag) {
     let isInside = false;
     const sessionData = getActiveRoundData(sessionID);
@@ -287,3 +280,19 @@ function setActiveRound(sessionID, imageName) {
         viewportDetails: null,
     };
 }
+
+exports.getPlayerData = (sessionID) => {
+    if (!userData.has(sessionID)) {
+        debug("no user data for this sessionID");
+        return;
+    }
+    return userData.get(sessionID);
+};
+
+exports.deletePlayerData = (sessionID) => {
+    if (!userData.has(sessionID)) {
+        debug("no user data for this sessionID");
+        return;
+    }
+    return userData.delete(sessionID);
+};

@@ -72,7 +72,6 @@ function ImageViewer() {
     useEffect(() => {
         async function sendViewportDetails() {
             if (!imageRef?.current) return;
-            console.log(vpDetails);
             await apiSendViewportDetails(vpDetails);
         }
         sendViewportDetails();

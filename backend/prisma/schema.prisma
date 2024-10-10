@@ -31,12 +31,12 @@ model Image {
 
 model Score {
     scoreId          String   @id @default(uuid())
-    scoreTs          DateTime
+    scoreTs          DateTime @default(now())
     session          Session  @relation(fields: [sessionId], references: [id])
     sessionId        String
     gamerTag         String
     busyBeachTime    Float
-    interscetionTime Float
+    intersectionTime Float
     fleaMarketTime   Float
     totalTime        Float
     score            Float
