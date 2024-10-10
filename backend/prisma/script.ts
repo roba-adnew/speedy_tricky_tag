@@ -17,13 +17,13 @@ const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 async function clearPostgres() {
     try {
         const imageDeletion = await prisma.image.deleteMany();
-        const scoreboardDeletion = await prisma.score.deleteMany();
+        //const scoreboardDeletion = await prisma.score.deleteMany();
 
         console.log(
             "images deleted",
             imageDeletion,
             "scoreboard deleted",
-            scoreboardDeletion
+            //scoreboardDeletion
         );
     } catch (err) {
         console.error(err);
