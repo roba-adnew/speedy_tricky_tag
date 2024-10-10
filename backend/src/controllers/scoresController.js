@@ -39,11 +39,10 @@ exports.submitScore = async (req, res, next) => {
                 score: scores.score,
             },
         });
-        debug("score added:", addScore);
         const scoreboard = await prisma.score.findMany();
-        debug("updated scoreboard");
-        deletePlayerData(req.sessionID);
-        res.status(201).json({ message: "folder created" });
+        const userDeleted = deletePlayerData(req.sessionID);
+        debug('user was deleted', userDeleted)
+        res.status(201).json({ message: "score was added", scoreboard });
     } catch (err) {
         debug(err);
         throw err;
@@ -52,6 +51,7 @@ exports.submitScore = async (req, res, next) => {
 
 function getMapScores(sessionID) {
     const playerData = getPlayerData(sessionID);
+    if (!playerData) return;
     const rounds = Object.keys(playerData);
     const times = {};
     rounds.forEach(

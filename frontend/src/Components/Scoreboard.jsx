@@ -5,12 +5,14 @@ import {
     submitScore as apiSubmitScore,
 } from "../utils/scoresApi";
 import { formattedName, formattedTime } from "../utils/functions";
+import { useNavigate } from "react-router-dom";
 
 function GameEnd() {
     const [finalScores, setFinalScores] = useState(null);
     const [scoreboard, setScoreboard] = useState(null);
     const [submitted, setSubmitted] = useState(false);
     const [gamerTag, setGamerTag] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function getFinalScores() {
@@ -23,7 +25,6 @@ function GameEnd() {
     useEffect(() => {
         async function getScoreboard() {
             const results = await apiGetScoreboard();
-            console.log("scoreboard:", results);
             setScoreboard(results);
         }
         getScoreboard();
@@ -83,6 +84,14 @@ function GameEnd() {
                     <button>submit</button>
                 </form>
             )}
+            <button
+                type="button"
+                onClick={() => {
+                    navigate("/");
+                }}
+            >
+                play again
+            </button>
             {scoreboard && (
                 <table>
                     <thead>
@@ -94,17 +103,32 @@ function GameEnd() {
                         <td>flea market</td>
                     </thead>
                     <tbody>
-                        {scoreboard.map(score => {
+                        {scoreboard.map((score) => {
                             return (
-                            <tr key={score.scoreId}>
-                                <td>{score.gamerTag}</td>
-                                <td>{score.score}</td>
-                                <td>{formattedTime(score.totalTime)}</td>
-                                <td>{formattedTime(score.busyBeachTime)}</td>
-                                <td>{formattedTime(score.intersectionTime)}</td>
-                                <td>{formattedTime(score.fleaMarketTime)}</td>
-                            </tr>)
-                        }) }
+                                <tr
+                                    key={score.scoreId}
+                                    style={{
+                                        backgroundColor:
+                                            score.gamerTag === gamerTag
+                                                ? "rgb(70, 255, 70)"
+                                                : "none",
+                                    }}
+                                >
+                                    <td>{score.gamerTag}</td>
+                                    <td>{score.score}</td>
+                                    <td>{formattedTime(score.totalTime)}</td>
+                                    <td>
+                                        {formattedTime(score.busyBeachTime)}
+                                    </td>
+                                    <td>
+                                        {formattedTime(score.intersectionTime)}
+                                    </td>
+                                    <td>
+                                        {formattedTime(score.fleaMarketTime)}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             )}
