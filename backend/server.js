@@ -45,8 +45,8 @@ app.use(
     session({
         cookie: {
             maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day in ms
-            sameSite: "lax",
-            secure: false,
+            sameSite: "none",
+            secure: true,
             httpOnly: true,
         },
         secret: process.env.SESSION_SECRET,
@@ -72,7 +72,6 @@ app.use((req, res, next) => {
 });
 
 app.use(cookieParser());
-app.options("*", cors());
 app.use("/game", gamePlayRouter);
 app.use("/scores", scoresRouter);
 
