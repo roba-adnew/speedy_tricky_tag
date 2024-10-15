@@ -3,7 +3,7 @@ const router = express.Router();
 const timerController = require("../controllers/timerController");
 const gamePlayController = require("../controllers/gamePlayController");
 
-router.post("/image-set", gamePlayController.getImageIds);
+router.get("/image-set", gamePlayController.getImageIds);
 
 router.post("/download", gamePlayController.downloadImage);
 

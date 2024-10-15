@@ -5,10 +5,10 @@ async function getImageSetMeta() {
     const download_url = `${base_url}/image-set`;
 
     const options = {
-        method: "POST",
+        method: "GET",
         credentials: "include",
-        headers: { "Content-type": "application/json" },
     };
+
     try {
         const response = await fetch(download_url, options);
         const results = await response.json();
