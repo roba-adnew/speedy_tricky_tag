@@ -2,15 +2,17 @@ require("dotenv").config();
 const debug = require("debug")("backend:data");
 const { PrismaClient } = require("@prisma/client");
 const { createClient } = require("@supabase/supabase-js");
-const session = require("express-session");
+const {
+    getActiveRoundData,
+    setActiveRound,
+    deletePlayerData,
+} = require("./playerManager");
 
 const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 
-const userData = new Map();
-
 exports.getImageIds = async (req, res, next) => {
-    userData.delete(req.sessionID);
+    deletePlayerData(req.sessionID);
     try {
         const imageIds = await prisma.image.findMany({
             select: {
@@ -236,63 +238,3 @@ function checkRoundResults(sessionID) {
 
     return roundResults;
 }
-
-function getActiveRoundData(sessionID) {
-    if (!userData.has(`${sessionID}`)) {
-        debug("cannot retrieve session data for this user, none exists");
-    }
-
-    const gameData = userData.get(sessionID);
-    const imageIds = Object.keys(gameData);
-
-    const activeImageId = imageIds.filter(
-        (imageId) => gameData[imageId].active
-    );
-
-    if (activeImageId.length > 1) {
-        debug("there is more than one active round");
-        return;
-    }
-    return gameData[activeImageId[0]];
-}
-
-function setActiveRound(sessionID, imageName) {
-    const gameData = userData.get(sessionID);
-    if (!gameData) {
-        userData.set(sessionID, {
-            [imageName]: {
-                active: true,
-                timerData: {
-                    signal: null,
-                    time: 0,
-                    interval: null,
-                },
-                riddles: {},
-                viewportDetails: null,
-            },
-        });
-        return;
-    }
-    gameData[imageName] = {
-        active: true,
-        timerData: { signal: null, time: 0, interval: null },
-        riddles: {},
-        viewportDetails: null,
-    };
-}
-
-exports.getPlayerData = (sessionID) => {
-    if (!userData.has(sessionID)) {
-        debug("no user data for this sessionID");
-        return;
-    }
-    return userData.get(sessionID);
-};
-
-exports.deletePlayerData = (sessionID) => {
-    if (!userData.has(sessionID)) {
-        debug("no user data for this sessionID");
-        return;
-    }
-    return userData.delete(sessionID);
-};

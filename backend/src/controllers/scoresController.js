@@ -1,11 +1,9 @@
 require("dotenv").config();
 const debug = require("debug")("backend:data");
 const { PrismaClient } = require("@prisma/client");
-const { createClient } = require("@supabase/supabase-js");
-const { getPlayerData, deletePlayerData } = require("./gameDataController");
+const { getPlayerData, deletePlayerData } = require("./playerManager");
 
 const prisma = new PrismaClient();
-const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 
 exports.getScores = async (req, res, next) => {
     const scores = getMapScores(req.sessionID);
@@ -16,13 +14,13 @@ exports.getScores = async (req, res, next) => {
 exports.getScoreBoard = async (req, res, next) => {
     try {
         const scoreboard = await prisma.score.findMany();
-        debug('scoreboard:', scoreboard)
-        res.json(scoreboard)
+        debug("scoreboard:", scoreboard);
+        res.json(scoreboard);
     } catch (err) {
-        debug('error getting scoreboard: %O', err);
+        debug("error getting scoreboard: %O", err);
         throw err;
     }
-}
+};
 
 exports.submitScore = async (req, res, next) => {
     const { gamerTag } = req.body;
@@ -41,7 +39,7 @@ exports.submitScore = async (req, res, next) => {
         });
         const scoreboard = await prisma.score.findMany();
         const userDeleted = deletePlayerData(req.sessionID);
-        debug('user was deleted', userDeleted)
+        debug("user was deleted", userDeleted);
         res.status(201).json({ message: "score was added", scoreboard });
     } catch (err) {
         debug(err);
