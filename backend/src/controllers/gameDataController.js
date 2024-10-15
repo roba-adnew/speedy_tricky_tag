@@ -7,6 +7,7 @@ const {
     setActiveRound,
     deletePlayerData,
 } = require("./playerManager");
+const { startTimer, stopTimer } = require("./timerController");
 
 const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
@@ -124,43 +125,6 @@ exports.receiveViewportDetails = (req, res, next) => {
     scaleTargets(req.sessionID);
     return res.sendStatus(200);
 };
-
-exports.getTime = (req, res, next) => {
-    const sessionData = getActiveRoundData(req.sessionID);
-
-    if (!sessionData?.timerData) {
-        return res
-            .status(400)
-            .json({ message: "No timer running for this session" });
-    }
-
-    res.json({ time: sessionData.timerData.time });
-};
-
-function startTimer(sessionID) {
-    const sessionData = getActiveRoundData(sessionID);
-    const updateIntervalMS = 1000;
-
-    if (sessionData.timerData.interval) {
-        debug("Timer is already running for this round.");
-        return;
-    }
-
-    sessionData.timerData.interval = setInterval(() => {
-        sessionData.timerData.time += updateIntervalMS;
-
-        if (sessionData.timerData.signal === "stop") {
-            clearInterval(sessionData.timerData.interval);
-            sessionData.timerData.interval = null;
-        }
-    }, updateIntervalMS);
-}
-
-function stopTimer(sessionID) {
-    const sessionData = getActiveRoundData(sessionID);
-    clearInterval(sessionData.timerData.interval);
-    sessionData.timerData.interval = null;
-}
 
 function scaleTargets(sessionID) {
     const roundData = getActiveRoundData(sessionID);
