@@ -23,6 +23,7 @@ app.use(express.json());
 const allowedOrigins = [
     "https://speedy-tricky-tag.vercel.app",
     "http://localhost:4000",
+    "https://speedy-tricky-tag-backend.vercel.app",
 ];
 
 app.use(
@@ -55,21 +56,6 @@ app.use(
         store: prismaSession,
     })
 );
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", req.headers.origin);
-    res.header(
-        "Access-Control-Allow-Methods",
-        "GET, POST, PUT, DELETE, OPTIONS"
-    );
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
-
-    if (req.method === "OPTIONS") {
-        return res.status(200).end();
-    }
-
-    next();
-});
 
 app.use(cookieParser());
 app.use("/game", gamePlayRouter);
