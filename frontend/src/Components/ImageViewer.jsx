@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useViewport } from "../hooks/useViewport";
+import { useRiddleSelect } from "../hooks/useRiddleSelect";
 import {
     getImageDetails as apiGetImage,
     checkTag as apiCheckTag,
@@ -19,17 +20,22 @@ function ImageViewer() {
     const [playerWon, setPlayerWon] = useState(null);
     const [successTime, setSuccessTime] = useState(null);
 
-    const [selectedRiddle, setSelectedRiddle] = useState(null);
     const [riddles, setRiddles] = useState(null);
     const [isTagging, setIsTagging] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
-    const [tagFlag, setTagFlag] = useState(false);
 
     const location = useLocation();
     const navigate = useNavigate();
     const imageIds = location.state?.imageIds;
 
     const { imageRef, getViewportDetails, setImageLoaded } = useViewport();
+    const {
+        selectRiddle,
+        selectedRiddle,
+        setSelectedRiddle,
+        tagFlag,
+        setTagFlag,
+    } = useRiddleSelect();
 
     useEffect(() => {
         async function getRoundMeta() {
@@ -63,12 +69,6 @@ function ImageViewer() {
             clearTimeout(resizeTimer);
         };
     }, []);
-
-    function selectRiddle(e) {
-        const selectedRiddle = e.target.id;
-        if (tagFlag) setTagFlag(false);
-        setSelectedRiddle(selectedRiddle);
-    }
 
     function toggleTagging() {
         setIsTagging(!isTagging);
