@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { getTime as apiGetTime } from "../utils/gamePlayApi";
+import { getTime as apiGetTime } from "../utils/api/gamePlayApi";
 import { formattedTime } from "../utils/functions";
 
 function Timer({ isRunning }) {

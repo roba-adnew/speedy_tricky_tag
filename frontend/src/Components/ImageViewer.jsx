@@ -5,7 +5,7 @@ import { useRiddles } from "../hooks/useRiddles";
 import {
     getImageDetails as apiGetImage,
     checkTag as apiCheckTag,
-} from "../utils/gamePlayApi";
+} from "../utils/api/gamePlayApi";
 import Timer from "./Timer";
 import { RiddleSection } from "./RiddleSection";
 import "../Styles/ImageViewer.css";

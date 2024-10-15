@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { sendViewportDetails as apiSendViewportDetails } from "../utils/gamePlayApi";
+import { sendViewportDetails as apiSendViewportDetails } from "../utils/api/gamePlayApi";
 
 export function useViewport() {
     const [imageLoaded, setImageLoaded] = useState(false);

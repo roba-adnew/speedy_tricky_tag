@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getImageSetMeta as apiGetImageSetMeta } from "../utils/gamePlayApi";
+import { getImageSetMeta as apiGetImageSetMeta } from "../utils/api/gamePlayApi";
 import { useNavigate } from "react-router-dom";
 
 function StartAndInstructions() {

@@ -3,7 +3,7 @@ import {
     getFinalScores as apiGetFinalScores,
     getScoreboard as apiGetScoreboard,
     submitScore as apiSubmitScore,
-} from "../utils/scoresApi";
+} from "../utils/api/scoresApi";
 import { formattedName, formattedTime } from "../utils/functions";
 import { useNavigate } from "react-router-dom";
 

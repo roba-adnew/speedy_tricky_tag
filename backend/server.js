@@ -3,12 +3,11 @@ const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-// const debug = require("debug")("backend:server");
 
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
 const { PrismaClient } = require("@prisma/client");
 
-const gameDataRouter = require("./src/routes/gameDataRouter");
+const gamePlayRouter = require("./src/routes/gamePlayRouter");
 const scoresRouter = require("./src/routes/scoresRouter");
 
 const allowedOrigins = [
@@ -57,7 +56,7 @@ app.use(
 );
 app.use(cookieParser());
 
-app.use("/images", gameDataRouter);
+app.use("/game", gamePlayRouter);
 app.use("/scores", scoresRouter);
 
 app.get("/", (req, res, next) => {
