@@ -1,7 +1,7 @@
 import App from "../App";
 import StartAndInstructions from "../Components/StartAndInstructions";
 import ImageViewer from "../Components/ImageViewer";
-import GameEnd from "../Components/Scoreboard";
+import Scoreboard from "../Components/Scoreboard";
 
 const routes = [
     {
@@ -18,7 +18,7 @@ const routes = [
             },
             {
                 path: "/scoreboard",
-                element: <GameEnd />,
+                element: <Scoreboard />,
             },
         ],
     },

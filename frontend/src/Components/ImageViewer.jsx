@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useViewport } from "../hooks/useViewport";
-import { useRiddleSelect } from "../hooks/useRiddleSelect";
+import { useRiddles } from "../hooks/useRiddles";
 import {
     getImageDetails as apiGetImage,
     checkTag as apiCheckTag,
 } from "../utils/gamePlayApi";
 import Timer from "./Timer";
+import { RiddleSection } from "./RiddleSection";
 import "../Styles/ImageViewer.css";
 import { formattedTime } from "../utils/functions";
 
@@ -35,7 +36,7 @@ function ImageViewer() {
         setSelectedRiddle,
         tagFlag,
         setTagFlag,
-    } = useRiddleSelect();
+    } = useRiddles();
 
     useEffect(() => {
         async function getRoundMeta() {
@@ -178,65 +179,6 @@ function ImageViewer() {
                     You have to select a riddle first
                 </div>
             )}
-
-            {playerWon && (
-                <div>ROUND COMPLETE! GETTING THE NEXT ONE READY!</div>
-            )}
-
-            {isRunning && playerCorrect === true && (
-                <div>NOICE! Got that one right!</div>
-            )}
-
-            {isRunning && playerCorrect === false && (
-                <div>
-                    sorry, you got it wrong, but keep going, time is ticking!
-                </div>
-            )}
-
-            <Timer isRunning={isRunning} />
-
-            {Object.keys(riddles).map((riddle, i) => {
-                return (
-                    <div key={riddle}>
-                        {riddles[riddle]?.answered && (
-                            <div
-                                key={`${riddle}-answer-marker`}
-                                className="correctMarker"
-                                style={{
-                                    border: "2px solid white",
-                                    width: "25px",
-                                    borderRadius: "10px",
-                                    textAlign: "center",
-                                    position: "absolute",
-                                    left: `${riddles[riddle]?.tag.x}px`,
-                                    top: `${riddles[riddle]?.tag.y}px`,
-                                    transform: "translate(-10%, -10%)",
-                                    zIndex: 1000,
-                                }}
-                            >
-                                &#10004;{i + 1}
-                            </div>
-                        )}
-                        <p
-                            key={`${riddle}-question`}
-                            id={riddle}
-                            style={{
-                                border: riddles[riddle]?.answered
-                                    ? "1px solid green"
-                                    : selectedRiddle === riddle
-                                    ? "1px solid blue"
-                                    : "none",
-                            }}
-                            onClick={
-                                riddles[riddle].answered ? null : selectRiddle
-                            }
-                        >
-                            {`${i + 1}. ${riddles[riddle].question}`}
-                        </p>
-                    </div>
-                );
-            })}
-
             {isTagging && !tagFlag && (
                 <form
                     onSubmit={handleTagSubmission}
@@ -256,6 +198,28 @@ function ImageViewer() {
                     </button>
                 </form>
             )}
+
+            {playerWon && (
+                <div>ROUND COMPLETE! GETTING THE NEXT ONE READY!</div>
+            )}
+
+            {isRunning && playerCorrect === true && (
+                <div>NOICE! Got that one right!</div>
+            )}
+
+            {isRunning && playerCorrect === false && (
+                <div>
+                    sorry, you got it wrong, but keep going, time is ticking!
+                </div>
+            )}
+
+            <Timer isRunning={isRunning} />
+
+            <RiddleSection
+                riddles={riddles}
+                selectRiddle={selectRiddle}
+                selectedRiddle={selectedRiddle}
+            />
         </div>
     );
 }

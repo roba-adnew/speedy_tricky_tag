@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export function useRiddleSelect() {
+export function useRiddles() {
     const [selectedRiddle, setSelectedRiddle] = useState(null);
     const [tagFlag, setTagFlag] = useState(false);
 

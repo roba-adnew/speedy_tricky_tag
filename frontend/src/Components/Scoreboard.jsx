@@ -7,7 +7,7 @@ import {
 import { formattedName, formattedTime } from "../utils/functions";
 import { useNavigate } from "react-router-dom";
 
-function GameEnd() {
+function Scoreboard() {
     const [finalScores, setFinalScores] = useState(null);
     const [scoreboard, setScoreboard] = useState(null);
     const [submitted, setSubmitted] = useState(false);
@@ -136,4 +136,4 @@ function GameEnd() {
     );
 }
 
-export default GameEnd;
+export default Scoreboard;
