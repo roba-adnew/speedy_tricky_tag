@@ -10,11 +10,6 @@ const { PrismaClient } = require("@prisma/client");
 const gamePlayRouter = require("./src/routes/gamePlayRouter");
 const scoresRouter = require("./src/routes/scoresRouter");
 
-const allowedOrigins = [
-    "https://speedy-tricky-tag.vercel.app",
-    "http://localhost:4000",
-];
-
 const prisma = new PrismaClient();
 const prismaSession = new PrismaSessionStore(prisma, {
     checkPeriod: 2 * 60 * 1000, // 2 hours in ms
@@ -24,6 +19,12 @@ const prismaSession = new PrismaSessionStore(prisma, {
 
 const app = express();
 app.use(express.json());
+
+const allowedOrigins = [
+    "https://speedy-tricky-tag.vercel.app",
+    "http://localhost:4000",
+];
+
 app.use(
     cors({
         origin: function (origin, callback) {
@@ -54,8 +55,24 @@ app.use(
         store: prismaSession,
     })
 );
-app.use(cookieParser());
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", req.headers.origin);
+    res.header(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, OPTIONS"
+    );
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
 
+    if (req.method === "OPTIONS") {
+        return res.status(200).end();
+    }
+
+    next();
+});
+
+app.use(cookieParser());
+app.options("*", cors());
 app.use("/game", gamePlayRouter);
 app.use("/scores", scoresRouter);
 
