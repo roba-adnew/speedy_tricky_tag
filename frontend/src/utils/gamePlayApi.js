@@ -108,8 +108,6 @@ async function checkTag(riddle, tag) {
     }
 }
 
-
-
 export {
     getImageSetMeta,
     getImageDetails,

@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useViewport } from "../hooks/useViewport";
 import {
     getImageDetails as apiGetImage,
-    sendViewportDetails as apiSendViewportDetails,
     checkTag as apiCheckTag,
 } from "../utils/gamePlayApi";
 import Timer from "./Timer";
@@ -10,8 +10,8 @@ import "../Styles/ImageViewer.css";
 import { formattedTime } from "../utils/functions";
 
 function ImageViewer() {
+    const [image, setImage] = useState(null);
     const [imageIdsIndex, setImageIdIndex] = useState(0);
-    const [imageLoaded, setImageLoaded] = useState(false);
 
     const [isLoading, setIsLoading] = useState(true);
     const [isRunning, setIsRunning] = useState(false);
@@ -20,19 +20,16 @@ function ImageViewer() {
     const [successTime, setSuccessTime] = useState(null);
 
     const [selectedRiddle, setSelectedRiddle] = useState(null);
-    const [image, setImage] = useState(null);
     const [riddles, setRiddles] = useState(null);
     const [isTagging, setIsTagging] = useState(false);
     const [tag, setTag] = useState({ x: 0, y: 0 });
     const [tagFlag, setTagFlag] = useState(false);
 
-    const [vpDetails, setVpDetails] = useState(null);
-    const [vpDetailsReady, setVpDetailsReady] = useState(false);
-
-    const imageRef = useRef(null);
     const location = useLocation();
     const navigate = useNavigate();
     const imageIds = location.state?.imageIds;
+
+    const { imageRef, getViewportDetails, setImageLoaded } = useViewport();
 
     useEffect(() => {
         async function getRoundMeta() {
@@ -52,10 +49,6 @@ function ImageViewer() {
     }, [imageIds, imageIdsIndex]);
 
     useEffect(() => {
-        getViewportDetails();
-    }, [image]);
-
-    useEffect(() => {
         let resizeTimer;
         function handleResize() {
             clearTimeout(resizeTimer);
@@ -70,37 +63,6 @@ function ImageViewer() {
             clearTimeout(resizeTimer);
         };
     }, []);
-
-    useEffect(() => {
-        if (imageLoaded && vpDetails) {
-            setVpDetailsReady(true);
-        }
-    }, [imageLoaded, vpDetails]);
-
-    useEffect(() => {
-        async function sendViewportDetails() {
-            if (vpDetailsReady) {
-                try {
-                    await apiSendViewportDetails(vpDetails);
-                } catch (err) {
-                    console.error(err);
-                }
-            }
-        }
-        sendViewportDetails();
-    }, [vpDetailsReady, vpDetails]);
-
-    function getViewportDetails() {
-        if (!imageRef?.current) return;
-        const scalerX = imageRef.current.width / imageRef.current.naturalWidth;
-        const scalerY =
-            imageRef.current.height / imageRef.current.naturalHeight;
-        const { x: xOffset, y: yOffset } =
-            imageRef.current.getBoundingClientRect();
-        const viewportDetails = { scalerX, scalerY, xOffset, yOffset };
-        setVpDetails(viewportDetails);
-        return viewportDetails;
-    }
 
     function selectRiddle(e) {
         const selectedRiddle = e.target.id;
