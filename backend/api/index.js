@@ -19,13 +19,8 @@ const prismaSession = new PrismaSessionStore(prisma, {
 
 const app = express();
 app.use(express.json());
-
-
-app.use(cors({
-    origin: 'http://localhost:4000',
-    credentials: true
-  }))
-
+app.use(cors());
+app.options("*", cors());
 app.use(
     session({
         cookie: {
