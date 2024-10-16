@@ -31,8 +31,8 @@ app.use(
     session({
         cookie: {
             maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day in ms
-            sameSite: "none",
-            secure: true,
+            sameSite: process.env.NODE_ENV === "PROD" ? "none" : "lax",
+            secure: process.env.NODE_ENV === "PROD",
             httpOnly: true,
         },
         secret: process.env.SESSION_SECRET,
@@ -63,8 +63,8 @@ app.use((err, req, res, next) => {
 
 if (process.env.NODE_ENV === "DEV") {
     app.listen(3000, () => {
-      console.log("Server is running on port 3000");
+        console.log("Server is running on port 3000");
     });
-  }
+}
 
 module.exports = app;
