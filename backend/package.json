@@ -26,6 +26,7 @@
         "mime-types": "^2.1.35",
         "nodemon": "^3.1.4",
         "prisma": "^5.19.1",
+        "serverless-http": "^3.2.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.6.2"
     }

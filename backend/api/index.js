@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
-const cookieParser = require("cookie-parser");
+const serverless = require("serverless-http");
 
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
 const { PrismaClient } = require("@prisma/client");
@@ -18,21 +18,16 @@ const prismaSession = new PrismaSessionStore(prisma, {
 });
 
 const app = express();
-app.use(express.json());
 const allowedOrigins = ["http://localhost:4000"];
+app.use(
+    cors({
+        origin: allowedOrigins,
+        credentials: true,
+    })
+);
 
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
-    credentials: true,
-};
+app.use(express.json());
 
-app.use(cors(corsOptions));
 app.use(
     session({
         cookie: {
@@ -48,7 +43,6 @@ app.use(
     })
 );
 
-app.use(cookieParser());
 app.use("/game", gamePlayRouter);
 app.use("/scores", scoresRouter);
 
@@ -68,6 +62,10 @@ app.use((err, req, res, next) => {
     });
 });
 
-app.listen(3000);
+if (process.env.NODE_ENV === "DEV") {
+    app.listen(3000, () => {
+      console.log("Server is running on port 3000");
+    });
+  }
 
-module.exports = app;
+module.exports = serverless(app);
