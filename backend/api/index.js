@@ -7,8 +7,8 @@ const cookieParser = require("cookie-parser");
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
 const { PrismaClient } = require("@prisma/client");
 
-const gamePlayRouter = require("./src/routes/gamePlayRouter");
-const scoresRouter = require("./src/routes/scoresRouter");
+const gamePlayRouter = require("../src/routes/gamePlayRouter");
+const scoresRouter = require("../src/routes/scoresRouter");
 
 const prisma = new PrismaClient();
 const prismaSession = new PrismaSessionStore(prisma, {
