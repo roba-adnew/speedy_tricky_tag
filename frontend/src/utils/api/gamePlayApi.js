@@ -1,5 +1,5 @@
 const domain =
-    import.meta.env.VITE_API_DEV_URL || import.meta.env.VITE_API_PROD_URL;
+import.meta.env.VITE_API_PROD_URL || import.meta.env.VITE_API_DEV_URL;
 const base_url = `${domain}/game`;
 
 async function getImageSetMeta() {

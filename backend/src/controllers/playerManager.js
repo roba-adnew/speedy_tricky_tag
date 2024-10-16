@@ -49,10 +49,12 @@ exports.setActiveRound = (sessionID, imageName) => {
 };
 
 exports.getPlayerData = (sessionID) => {
+    debug('user exists in map:', userData.has(sessionID))
     if (!userData.has(sessionID)) {
         debug("no user data for this sessionID");
         return;
     }
+    debug('user does have data:', userData.get(sessionID))
     return userData.get(sessionID);
 };
 
