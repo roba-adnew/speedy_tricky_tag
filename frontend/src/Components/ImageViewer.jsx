@@ -69,7 +69,7 @@ function ImageViewer() {
             window.removeEventListener("resize", handleResize);
             clearTimeout(resizeTimer);
         };
-    }, []);
+    });
 
     function toggleTagging() {
         setIsTagging(!isTagging);

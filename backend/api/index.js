@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
-const serverless = require("serverless-http");
 
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
 const { PrismaClient } = require("@prisma/client");
@@ -68,4 +67,4 @@ if (process.env.NODE_ENV === "DEV") {
     });
   }
 
-module.exports = serverless(app);
+module.exports = app;
