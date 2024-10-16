@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "vercel-build": "prisma generate && prisma migrate deploy && echo hello",
+        "vercel-build": "echo hello",
         "query": "nodemon prisma/script.ts",
         "populate": "nodemon prisma/populateDB.ts",
         "devstart": "nodemon api/index.js"
