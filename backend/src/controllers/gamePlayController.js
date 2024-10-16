@@ -1,5 +1,5 @@
 require("dotenv").config();
-const debug = require("debug")("backend:data");
+const debug = require("debug")("backend:playController");
 const { PrismaClient } = require("@prisma/client");
 const { createClient } = require("@supabase/supabase-js");
 const {
@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 
 exports.getImageIds = async (req, res, next) => {
-    deletePlayerData(req.sessionID);
+    // deletePlayerData(req.sessionID);
     try {
         const imageIds = await prisma.image.findMany({
             select: {
@@ -70,11 +70,15 @@ exports.downloadImage = async (req, res, next) => {
 };
 
 exports.getImageMeta = async (req, res, next) => {
-    debug("imageId meta request : %O", req.body.imageId);
+    debug(
+        "imageId meta request and sessionID : %O",
+        req.body.imageId,
+        req.sessionID
+    );
     const { imageId } = req.body;
 
     if (!imageId) {
-        return res.status(400).json({ error: "Image name is required" });
+        return res.status(400).json({ error: "Image ID is required" });
     }
 
     try {

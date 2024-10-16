@@ -1,4 +1,4 @@
-const debug = require("debug")("backend:data");
+const debug = require("debug")("backend:player");
 
 const userData = new Map();
 
@@ -36,8 +36,10 @@ exports.setActiveRound = (sessionID, imageName) => {
                 viewportDetails: null,
             },
         });
+        debug('setting new user', userData.get(sessionID))
         return;
     }
+
     gameData[imageName] = {
         active: true,
         timerData: { signal: null, time: 0, interval: null },
