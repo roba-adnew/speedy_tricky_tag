@@ -19,8 +19,20 @@ const prismaSession = new PrismaSessionStore(prisma, {
 
 const app = express();
 app.use(express.json());
-app.use(cors());
-app.options("*", cors());
+const allowedOrigins = ["http://localhost:4000"];
+
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(
     session({
         cookie: {
