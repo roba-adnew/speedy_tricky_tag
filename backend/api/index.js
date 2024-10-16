@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
+const serverless = require("serverless-http");
 
 const { PrismaSessionStore } = require("@quixo3/prisma-session-store");
 const { PrismaClient } = require("@prisma/client");
@@ -18,33 +19,12 @@ const prismaSession = new PrismaSessionStore(prisma, {
 
 const app = express();
 const allowedOrigins = ["http://localhost:4000"];
-// app.use(
-//     cors({
-//         origin: allowedOrigins,
-//         credentials: true,
-//     })
-// );
-
-app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    if (allowedOrigins.includes(origin)) {
-        res.setHeader("Access-Control-Allow-Origin", origin);
-    }
-    res.header("Access-Control-Allow-Credentials", "true");
-    res.header(
-        "Access-Control-Allow-Methods",
-        "GET,HEAD,OPTIONS,POST,PUT,DELETE"
-    );
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
-    if (req.method === "OPTIONS") {
-        res.sendStatus(204);
-    } else {
-        next();
-    }
-});
+app.use(
+    cors({
+        origin: allowedOrigins,
+        credentials: true,
+    })
+);
 
 app.use(express.json());
 
@@ -88,4 +68,4 @@ if (process.env.NODE_ENV === "DEV") {
     });
 }
 
-module.exports = app;
+module.exports = serverless(app);
