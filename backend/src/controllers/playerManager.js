@@ -3,7 +3,7 @@ const debug = require("debug")("backend:data");
 const userData = new Map();
 
 exports.getActiveRoundData = (sessionID) => {
-    if (!userData.has(`${sessionID}`)) {
+    if (!userData.has(sessionID)) {
         debug("cannot retrieve session data for this user, none exists");
     }
 
