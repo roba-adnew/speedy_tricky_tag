@@ -32,6 +32,7 @@ async function getImageDetails(imageId) {
         headers: { "Content-type": "application/json" },
         body: JSON.stringify({ imageId: imageId.id }),
     };
+    
     try {
         const downloadResponse = await fetch(download_url, options);
         const blob = await downloadResponse.blob();

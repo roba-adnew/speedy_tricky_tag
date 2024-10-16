@@ -1,4 +1,5 @@
 require("dotenv").config();
+const debug = require("debug")("backend:server");
 const express = require("express");
 const session = require("express-session");
 const cors = require("cors");
@@ -26,7 +27,7 @@ app.use(
 );
 
 app.use(express.json());
-
+debug("env:", process.env.NODE_ENV)
 app.use(
     session({
         cookie: {
