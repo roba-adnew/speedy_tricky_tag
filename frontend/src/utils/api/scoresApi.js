@@ -1,5 +1,5 @@
-const domain =
-    import.meta.env.VITE_API_DEV_URL || import.meta.env.VITE_API_PROD_URL;
+const domain = import.meta.env.ENV === 'DEV' ? 
+    import.meta.env.VITE_API_DEV_URL : import.meta.env.VITE_API_PROD_URL;
 
 const base_url = `${domain}/scores`;
 
