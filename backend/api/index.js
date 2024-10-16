@@ -27,13 +27,13 @@ app.use(
 );
 
 app.use(express.json());
-debug("env:", process.env.NODE_ENV)
+debug("env:", process.env.NODE_ENV);
 app.use(
     session({
         cookie: {
             maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day in ms
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax", //process.env.NODE_ENV === "production" ? "none" : "lax",
+            secure: false, //process.env.NODE_ENV === "production",
             httpOnly: true,
         },
         secret: process.env.SESSION_SECRET,
@@ -62,7 +62,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-if (process.env.NODE_ENV === "DEV") {
+if (process.env.NODE_ENV === "development") {
     app.listen(3000, () => {
         console.log("Server is running on port 3000");
     });
