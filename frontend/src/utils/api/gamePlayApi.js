@@ -7,7 +7,7 @@ async function getImageSetMeta() {
     const download_url = `${base_url}/image-set`;
 
     const options = {
-        method: "GET",
+        method: "POST",
         credentials: "include",
     };
 
