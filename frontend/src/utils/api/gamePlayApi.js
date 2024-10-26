@@ -7,6 +7,7 @@ const base_url = `${domain}/game`;
 
 async function getImageSetMeta() {
     const download_url = `${base_url}/image-set`;
+    console.log(download_url)
 
     const options = {
         method: "GET",
