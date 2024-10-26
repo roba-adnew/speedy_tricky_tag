@@ -1,13 +1,10 @@
-const flag = 'dev'
-
-const domain = flag === 'dev' ?
-    import.meta.env.VITE_API_DEV_URL : import.meta.env.VITE_API_PROD_URL;
+const domain =
+    import.meta.env.VITE_API_PROD_URL || import.meta.env.VITE_API_DEV_URL;
 
 const base_url = `${domain}/game`;
 
 async function getImageSetMeta() {
     const download_url = `${base_url}/image-set`;
-    console.log(download_url)
 
     const options = {
         method: "GET",
