@@ -1,5 +1,5 @@
 const { getActiveRoundData } = require("./playerManager");
-const debug = require("debug")("backend:data");
+const debug = require("debug")("backend:timer");
 
 exports.getTime = (req, res, next) => {
     const sessionData = getActiveRoundData(req.sessionID);

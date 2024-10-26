@@ -1,5 +1,5 @@
 require("dotenv").config();
-const debug = require("debug")("backend:playController");
+const debug = require("debug")("backend:gameplay");
 const { PrismaClient } = require("@prisma/client");
 const { createClient } = require("@supabase/supabase-js");
 const {

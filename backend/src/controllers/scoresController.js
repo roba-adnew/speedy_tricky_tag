@@ -1,5 +1,5 @@
 require("dotenv").config();
-const debug = require("debug")("backend:data");
+const debug = require("debug")("backend:scoreboard");
 const { PrismaClient } = require("@prisma/client");
 const { getPlayerData, deletePlayerData } = require("./playerManager");
 
