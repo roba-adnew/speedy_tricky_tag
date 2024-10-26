@@ -36,7 +36,7 @@ exports.setActiveRound = (sessionID, imageName) => {
                 viewportDetails: null,
             },
         });
-        debug('setting new user', userData.get(sessionID))
+        debug('setting new user', sessionID, userData.get(sessionID))
         return;
     }
 
