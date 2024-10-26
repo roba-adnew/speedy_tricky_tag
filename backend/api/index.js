@@ -35,6 +35,7 @@ app.use(
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production",
             httpOnly: true,
+            domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined
         },
         secret: process.env.SESSION_SECRET,
         resave: false, // only resave on change
@@ -42,6 +43,17 @@ app.use(
         store: prismaSession,
     })
 );
+
+app.use((req, res, next) => {
+    debug('Cookie Settings:', {
+        domain: req.session.cookie.domain,
+        sameSite: req.session.cookie.sameSite,
+        secure: req.session.cookie.secure
+    });
+    debug('Session ID:', req.sessionID);
+    debug('Session:', req.session);
+    next();
+});
 
 app.use("/game", gamePlayRouter);
 app.use("/scores", scoresRouter);
