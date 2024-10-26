@@ -18,7 +18,11 @@ const prismaSession = new PrismaSessionStore(prisma, {
 });
 
 const app = express();
-const allowedOrigins = ["http://localhost:4000", "https://speedy-tricky-tag.vercel.app"];
+const allowedOrigins = [
+    "http://localhost:4000",
+    "https://speedy-tricky-tag.vercel.app",
+    "http://speedy-tricky-tag.vercel.app",
+];
 app.use(
     cors({
         origin: allowedOrigins,
@@ -27,7 +31,7 @@ app.use(
 );
 
 app.use(express.json());
-debug("env:", process.env.NODE_ENV)
+debug("env:", process.env.NODE_ENV);
 app.use(
     session({
         cookie: {
@@ -35,7 +39,10 @@ app.use(
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             secure: process.env.NODE_ENV === "production",
             httpOnly: true,
-            domain: process.env.NODE_ENV === "production" ? ".vercel.app" : undefined
+            domain:
+                process.env.NODE_ENV === "production"
+                    ? ".vercel.app"
+                    : undefined,
         },
         secret: process.env.SESSION_SECRET,
         resave: false, // only resave on change
@@ -45,13 +52,8 @@ app.use(
 );
 
 app.use((req, res, next) => {
-    debug('Cookie Settings:', {
-        domain: req.session.cookie.domain,
-        sameSite: req.session.cookie.sameSite,
-        secure: req.session.cookie.secure
-    });
-    debug('Session ID:', req.sessionID);
-    debug('Session:', req.session);
+    debug("Session ID:", req.sessionID);
+    debug("Session:", req.session);
     next();
 });
 

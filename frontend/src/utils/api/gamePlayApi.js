@@ -1,5 +1,7 @@
-const domain =
-    import.meta.env.VITE_API_PROD_URL || import.meta.env.VITE_API_DEV_URL;
+const flag = 'dev'
+
+const domain = flag === 'dev' ?
+    import.meta.env.VITE_API_DEV_URL : import.meta.env.VITE_API_PROD_URL;
 
 const base_url = `${domain}/game`;
 
