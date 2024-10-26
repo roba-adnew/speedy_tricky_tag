@@ -3,6 +3,8 @@ const debug = require("debug")("backend:player");
 const userData = new Map();
 
 exports.getActiveRoundData = (sessionID) => {
+    debug('getting user', sessionID, userData.has(sessionID))
+
     if (!userData.has(sessionID)) {
         debug("cannot retrieve session data for this user, none exists");
     }
