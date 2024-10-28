@@ -18,10 +18,12 @@ const prismaSession = new PrismaSessionStore(prisma, {
 });
 
 const app = express();
+
 const allowedOrigins = [
     "http://localhost:4000", 
     "https://speedy-tricky-tag.vercel.app"
 ];
+
 app.use(
     cors({
         origin: allowedOrigins,

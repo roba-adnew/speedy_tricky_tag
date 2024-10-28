@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 
-export function RiddleSection({ riddles, selectRiddle, selectedRiddle }) {
+function RiddleSection({ riddles, selectRiddle, selectedRiddle }) {
     return Object.keys(riddles).map((riddle, i) => {
         return (
             <div key={riddle}>
@@ -47,3 +47,5 @@ RiddleSection.propTypes = {
     selectRiddle: PropTypes.func,
     selectedRiddle: PropTypes.string,
 };
+
+export default RiddleSection;

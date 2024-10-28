@@ -7,7 +7,8 @@ import {
     checkTag as apiCheckTag,
 } from "../utils/api/gamePlayApi";
 import Timer from "./Timer";
-import { RiddleSection } from "./RiddleSection";
+import RiddleSection from "./RiddleSection";
+import SuccessFlag from "./SuccessFlag";
 import "../Styles/ImageViewer.css";
 import { formattedTime } from "../utils/functions";
 
@@ -151,75 +152,71 @@ function ImageViewer() {
     }
 
     return (
-        <div style={{ position: "relative" }}>
-            <img
-                className="photo"
-                src={image}
-                alt="Intersection"
-                onClick={tagTarget}
-                onLoad={() => {
-                    getViewportDetails();
-                    setImageLoaded(true);
-                }}
-                ref={imageRef}
-            />
-            {tagFlag && (
-                <div
-                    className="unselectedTag"
-                    style={{
-                        border: "1px solid black",
-                        backgroundColor: "pink",
-                        position: "absolute",
-                        left: `${tag.x}px`,
-                        top: `${tag.y}px`,
-                        transform: "translate(-10%, -10%)",
-                        zIndex: 1000,
+        <div className="game" style={{ position: "relative" }}>
+            <div className="image">
+                <img
+                    className="photo"
+                    src={image}
+                    alt="Intersection"
+                    onClick={tagTarget}
+                    onLoad={() => {
+                        getViewportDetails();
+                        setImageLoaded(true);
                     }}
-                >
-                    You have to select a riddle first
-                </div>
-            )}
-            {isTagging && !tagFlag && (
-                <form
-                    onSubmit={handleTagSubmission}
-                    style={{
-                        position: "absolute",
-                        left: `${tag.x}px`,
-                        top: `${tag.y}px`,
-                        transform: "translate(-10%, -10%)",
-                        zIndex: 1000,
-                    }}
-                >
-                    <button type="submit">
-                        that&apos;s it, tag it! TAG IT NOW!
-                    </button>
-                    <button onClick={toggleTagging} type="button">
-                        ehh, nevermind
-                    </button>
-                </form>
-            )}
+                    ref={imageRef}
+                />
+                {tagFlag && (
+                    <div
+                        className="unselectedTag"
+                        style={{
+                            border: "1px solid black",
+                            backgroundColor: "pink",
+                            position: "absolute",
+                            left: `${tag.x}px`,
+                            top: `${tag.y}px`,
+                            transform: "translate(-10%, -10%)",
+                            zIndex: 1000,
+                        }}
+                    >
+                        You have to select a riddle first
+                    </div>
+                )}
+                {isTagging && !tagFlag && (
+                    <form
+                        onSubmit={handleTagSubmission}
+                        style={{
+                            position: "absolute",
+                            left: `${tag.x}px`,
+                            top: `${tag.y}px`,
+                            transform: "translate(-10%, -10%)",
+                            zIndex: 1000,
+                        }}
+                    >
+                        <button type="submit">
+                            that&apos;s it, tag it! TAG IT NOW!
+                        </button>
+                        <button onClick={toggleTagging} type="button">
+                            ehh, nevermind
+                        </button>
+                    </form>
+                )}
+            </div>
 
-            {playerWon && (
-                <div>ROUND COMPLETE! GETTING THE NEXT ONE READY!</div>
-            )}
+            <div className="riddles">
+                <SuccessFlag
+                    isRunning={isRunning}
+                    playerCorrect={playerCorrect}
+                    playerWon={playerWon}
+                />
 
-            {isRunning && playerCorrect === true && (
-                <div>NOICE! Got that one right!</div>
-            )}
+                <Timer isRunning={isRunning} />
 
-            {isRunning && playerCorrect === false && (
-                <div>
-                    sorry, you got it wrong, but keep going, time is ticking!
-                </div>
-            )}
-
-            <Timer isRunning={isRunning} />
-
-            <RiddleSection
-                riddles={riddles}
-                selectRiddle={selectRiddle}
-                selectedRiddle={selectedRiddle}
-            />
+                <RiddleSection
+                    riddles={riddles}
+                    selectRiddle={selectRiddle}
+                    selectedRiddle={selectedRiddle}
+                />
+            </div>
         </div>
     );
 }
