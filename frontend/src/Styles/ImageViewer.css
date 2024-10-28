@@ -1,9 +1,10 @@
 .photo {
-    width: 80%;
-    height: auto
+    width: 50%;
+    height: auto;
 }
 
 .correctMarker {
     background-color: green;
-    color: white
+    color: white;
 }
+

@@ -56,21 +56,6 @@ function ImageViewer() {
         getRoundMeta();
     }, [imageIds, imageIdsIndex]);
 
-    useEffect(() => {
-        let resizeTimer;
-        function handleResize() {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                getViewportDetails();
-            }, 500);
-        }
-
-        window.addEventListener("resize", handleResize);
-        return () => {
-            window.removeEventListener("resize", handleResize);
-            clearTimeout(resizeTimer);
-        };
-    });
 
     function toggleTagging() {
         setIsTagging(!isTagging);

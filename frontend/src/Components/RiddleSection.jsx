@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import "../Styles/RiddleSection.css";
 
 function RiddleSection({ riddles, selectRiddle, selectedRiddle }) {
     return Object.keys(riddles).map((riddle, i) => {
@@ -24,6 +25,7 @@ function RiddleSection({ riddles, selectRiddle, selectedRiddle }) {
                     </div>
                 )}
                 <p
+                    className="riddle"
                     key={`${riddle}-question`}
                     id={riddle}
                     style={{
@@ -32,6 +34,7 @@ function RiddleSection({ riddles, selectRiddle, selectedRiddle }) {
                             : selectedRiddle === riddle
                             ? "1px solid blue"
                             : "none",
+                        fontSize: selectedRiddle === riddle ? "1rem" : "0.7rem"
                     }}
                     onClick={riddles[riddle].answered ? null : selectRiddle}
                 >
