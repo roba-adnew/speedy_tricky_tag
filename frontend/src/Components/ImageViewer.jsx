@@ -7,7 +7,7 @@ import {
     checkTag as apiCheckTag,
 } from "../utils/api/gamePlayApi";
 import Timer from "./Timer";
-import RiddleSection from "./RiddleSection";
+// import RiddleSection from "./RiddleSection";
 import SuccessFlag from "./SuccessFlag";
 import "../Styles/ImageViewer.css";
 import { formattedTime } from "../utils/functions";
@@ -30,7 +30,13 @@ function ImageViewer() {
     const navigate = useNavigate();
     const imageIds = location.state?.imageIds;
 
-    const { imageRef, getViewportDetails, setImageLoaded } = useViewport();
+    const {
+        imageRef,
+        containerRef,
+        textRef,
+        getViewportDetails,
+        setImageLoaded,
+    } = useViewport();
     const {
         selectRiddle,
         selectedRiddle,
@@ -56,16 +62,15 @@ function ImageViewer() {
         getRoundMeta();
     }, [imageIds, imageIdsIndex]);
 
-
     function toggleTagging() {
         setIsTagging(!isTagging);
     }
 
     function tagTarget(e) {
         if (isTagging) return;
-        const frame = e.target.getBoundingClientRect();
-        const x = e.clientX - frame.left;
-        const y = e.clientY - frame.top;
+        const x = e.clientX;
+        const y = e.clientY;
+        console.log("tag:", x, y)
         setTag({ x, y });
         if (!selectedRiddle) {
             setTagFlag(true);
@@ -84,6 +89,7 @@ function ImageViewer() {
         );
 
         if (correct) {
+            console.log("correct tag:", tag);
             const updatedRiddles = {
                 ...riddles,
                 [selectedRiddle]: {
@@ -135,10 +141,9 @@ function ImageViewer() {
             </div>
         );
     }
-
     return (
         <div className="game" style={{ position: "relative" }}>
-            <div className="image">
+            <div className="imageContainer" ref={containerRef}>
                 <img
                     className="photo"
                     src={image}
@@ -185,9 +190,30 @@ function ImageViewer() {
                         </button>
                     </form>
                 )}
+                {Object.keys(riddles).map(
+                    (riddle, i) =>
+                        riddles[riddle]?.answered && (
+                            <div
+                                key={`${riddle}-answer-marker`}
+                                className="correctMarker"
+                                style={{
+                                    border: "2px solid white",
+                                    width: "25px",
+                                    borderRadius: "10px",
+                                    textAlign: "center",
+                                    position: "absolute",
+                                    left: `${riddles[riddle]?.tag.x}px`,
+                                    top: `${riddles[riddle]?.tag.y}px`,
+                                    zIndex: 1000,
+                                }}
+                            >
+                                &#10004;{i + 1}
+                            </div>
+                        )
+                )}
             </div>
 
-            <div className="riddles">
+            <div className="riddles" ref={textRef}>
                 <SuccessFlag
                     isRunning={isRunning}
                     playerCorrect={playerCorrect}
@@ -196,14 +222,69 @@ function ImageViewer() {
 
                 <Timer isRunning={isRunning} />
 
-                <RiddleSection
-                    riddles={riddles}
-                    selectRiddle={selectRiddle}
-                    selectedRiddle={selectedRiddle}
-                />
+                <div>
+                    {Object.keys(riddles).map((riddle, i) => {
+                        return (
+                            <div key={riddle}>
+                                <p
+                                    className="riddle"
+                                    key={`${riddle}-question`}
+                                    id={riddle}
+                                    style={{
+                                        border: riddles[riddle]?.answered
+                                            ? "2px solid green"
+                                            : selectedRiddle === riddle
+                                            ? "2px solid blue"
+                                            : "2px solid rgb(220, 220, 220)",
+                                        margin: "0rem",
+                                        padding: "0.2rem"
+                                    }}
+                                    onClick={
+                                        riddles[riddle].answered
+                                            ? null
+                                            : selectRiddle
+                                    }
+                                >
+                                    {`${i + 1}. ${riddles[riddle].question}`}
+                                </p>
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
 }
 
 export default ImageViewer;
+
+{
+    /* 
+                <RiddleSection
+                    riddles={riddles}
+                    selectRiddle={selectRiddle}
+                    selectedRiddle={selectedRiddle}
+                /> */
+}
+
+{
+    /* {riddles[riddle]?.answered && (
+                                    <div
+                                        key={`${riddle}-answer-marker`}
+                                        className="correctMarker"
+                                        style={{
+                                            border: "2px solid white",
+                                            width: "25px",
+                                            borderRadius: "10px",
+                                            textAlign: "center",
+                                            position: "relative",
+                                            left: `${riddles[riddle]?.tag.x}px`,
+                                            top: `${riddles[riddle]?.tag.y}px`,
+                                            transform: "translate(-10%, -10%)",
+                                            zIndex: 1000,
+                                        }}
+                                    >
+                                        &#10004;{i + 1}
+                                    </div>
+                                )} */
+}

@@ -258,7 +258,7 @@ const targets: Targets = {
             question:
                 "Strong and swift with flowing mane, we pull the cart and\
              race the lane; Once vital in wars, now in sport we thrive; With\
-              hooves that thunder, we come alive; What am we?",
+              hooves that thunder, we come alive; What are we?",
             answer: "horses",
             targets: [
                 [

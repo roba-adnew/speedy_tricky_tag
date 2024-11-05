@@ -49,12 +49,11 @@ app.use(
     })
 );
 
-
-app.use((req, res, next) => {
-    debug('Session ID:', req.sessionID);
-    debug('Session:', req.session);
-    next();
-});
+// app.use((req, res, next) => {
+//     debug('Session ID:', req.sessionID);
+//     debug('Session:', req.session);
+//     next();
+// });
 
 app.use("/game", gamePlayRouter);
 app.use("/scores", scoresRouter);

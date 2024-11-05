@@ -5,7 +5,27 @@ export function useViewport() {
     const [imageLoaded, setImageLoaded] = useState(false);
     const [vpDetails, setVpDetails] = useState(null);
     const [vpDetailsReady, setVpDetailsReady] = useState(false);
+    // const [imageHeight, setImageHeight] = useState(null);
     const imageRef = useRef(null);
+    const containerRef = useRef(null);
+    const textRef = useRef(null);
+
+    // useEffect(() => {
+    //     function updateImageSize() {
+    //         if (imageRef.current && textRef.current) {
+    //             const availableHeight =
+    //                 window.innerHeight - textRef.current.offsetHeight;
+    //             console.log("window:", window.innerHeight);
+    //             console.log("text:", textRef.current.offsetHeight);
+    //             console.log("image:", imageRef.current.height);
+    //             console.log("avail:", availableHeight);
+    //             setImageHeight(availableHeight);
+    //         }
+    //     }
+    //     updateImageSize();
+    //     window.addEventListener("resize", updateImageSize);
+    //     return () => window.removeEventListener("resize"), updateImageSize();
+    // }, []);
 
     useEffect(() => {
         async function sendViewportDetails() {
@@ -40,7 +60,7 @@ export function useViewport() {
             window.removeEventListener("resize", handleResize);
             clearTimeout(resizeTimer);
         };
-    }, []);
+    });
 
     function getViewportDetails() {
         if (!imageRef?.current) return;
@@ -50,11 +70,15 @@ export function useViewport() {
         const { x: xOffset, y: yOffset } =
             imageRef.current.getBoundingClientRect();
         const viewportDetails = { scalerX, scalerY, xOffset, yOffset };
+        console.log("viewportDetails:", viewportDetails)
         setVpDetails(viewportDetails);
         return viewportDetails;
     }
 
     return {
+        // imageHeight,
+        containerRef,
+        textRef,
         imageRef,
         getViewportDetails,
         setImageLoaded,

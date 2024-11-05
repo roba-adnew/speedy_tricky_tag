@@ -3,7 +3,6 @@ const debug = require("debug")("backend:timer");
 
 exports.getTime = (req, res, next) => {
     const sessionData = getActiveRoundData(req.sessionID);
-
     if (!sessionData?.timerData) {
         return res
             .status(400)

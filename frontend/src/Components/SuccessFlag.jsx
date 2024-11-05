@@ -3,6 +3,9 @@ import PropTypes from "prop-types";
 function SuccessFlag({ isRunning, playerCorrect, playerWon }) {
     return (
         <>
+        {playerCorrect === null && (
+                <div>Goood luccck</div>
+            )}
             {playerWon && (
                 <div>ROUND COMPLETE! GETTING THE NEXT ONE READY!</div>
             )}

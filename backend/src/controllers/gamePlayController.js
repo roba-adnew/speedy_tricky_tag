@@ -13,7 +13,7 @@ const prisma = new PrismaClient();
 const supabase = createClient(process.env.SB_API_URL, process.env.SB_API_KEY);
 
 exports.getImageIds = async (req, res, next) => {
-    // deletePlayerData(req.sessionID);
+    //deletePlayerData(req.sessionID);
     try {
         const imageIds = await prisma.image.findMany({
             select: {
@@ -132,15 +132,15 @@ exports.receiveViewportDetails = (req, res, next) => {
 
 function scaleTargets(sessionID) {
     const roundData = getActiveRoundData(sessionID);
-    const { scalerX: scaler, xOffset, yOffset } = roundData.viewportDetails;
+    const { scalerX, scalerY, xOffset, yOffset } = roundData.viewportDetails;
     const riddleKeys = Object.keys(roundData.riddles);
     riddleKeys.forEach((riddle) => {
         roundData.riddles[riddle].scaledTargets = roundData.riddles[
             riddle
         ].targets.map((target) =>
             target.map((coord) => ({
-                x: scaler * (coord.x + xOffset),
-                y: scaler * (coord.y + yOffset),
+                x: scalerX * coord.x + xOffset,
+                y: scalerY * coord.y + yOffset,
             }))
         );
     });
