@@ -15,4 +15,15 @@ function formattedName(name) {
     return name.replaceAll("_", " ").slice(0, name.length - 4);
 }
 
-export { formattedTime, formattedName };
+function formattedScore(score) {
+    const scoreStr = score.toString();
+    if (scoreStr.length <= 3) {
+        return scoreStr;
+    }
+    const lastThree = scoreStr.slice(-3);
+    const remaining = scoreStr.slice(0, -3);
+
+    return formattedScore(remaining) + "," + lastThree;
+}
+
+export { formattedTime, formattedName, formattedScore };

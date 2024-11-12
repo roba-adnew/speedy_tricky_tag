@@ -13,7 +13,9 @@ exports.getScores = async (req, res, next) => {
 
 exports.getScoreBoard = async (req, res, next) => {
     try {
-        const scoreboard = await prisma.score.findMany();
+        const scoreboard = await prisma.score.findMany({
+            orderBy: { score: 'desc' }
+        });
         debug("scoreboard:", scoreboard);
         res.json(scoreboard);
     } catch (err) {

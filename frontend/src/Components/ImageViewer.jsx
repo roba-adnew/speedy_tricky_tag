@@ -68,10 +68,7 @@ function ImageViewer() {
 
     function tagTarget(e) {
         if (isTagging) return;
-        const x = e.clientX;
-        const y = e.clientY;
-        console.log("tag:", x, y)
-        setTag({ x, y });
+        setTag({ x: e.clientX, y: e.clientY });
         if (!selectedRiddle) {
             setTagFlag(true);
             setIsTagging(false);
@@ -202,6 +199,7 @@ function ImageViewer() {
                                     borderRadius: "10px",
                                     textAlign: "center",
                                     position: "absolute",
+                                    transform: "translate(-15%, -15%)",
                                     left: `${riddles[riddle]?.tag.x}px`,
                                     top: `${riddles[riddle]?.tag.y}px`,
                                     zIndex: 1000,
@@ -257,34 +255,3 @@ function ImageViewer() {
 }
 
 export default ImageViewer;
-
-{
-    /* 
-                <RiddleSection
-                    riddles={riddles}
-                    selectRiddle={selectRiddle}
-                    selectedRiddle={selectedRiddle}
-                /> */
-}
-
-{
-    /* {riddles[riddle]?.answered && (
-                                    <div
-                                        key={`${riddle}-answer-marker`}
-                                        className="correctMarker"
-                                        style={{
-                                            border: "2px solid white",
-                                            width: "25px",
-                                            borderRadius: "10px",
-                                            textAlign: "center",
-                                            position: "relative",
-                                            left: `${riddles[riddle]?.tag.x}px`,
-                                            top: `${riddles[riddle]?.tag.y}px`,
-                                            transform: "translate(-10%, -10%)",
-                                            zIndex: 1000,
-                                        }}
-                                    >
-                                        &#10004;{i + 1}
-                                    </div>
-                                )} */
-}

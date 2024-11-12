@@ -1,0 +1,9 @@
+body {
+    display: flex;
+}
+
+table td {
+    text-align: right;
+    padding: 2px;
+    border: 0.5px solid black;
+}

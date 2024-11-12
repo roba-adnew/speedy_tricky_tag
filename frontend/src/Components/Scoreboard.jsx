@@ -4,8 +4,13 @@ import {
     getScoreboard as apiGetScoreboard,
     submitScore as apiSubmitScore,
 } from "../utils/api/scoresApi";
-import { formattedName, formattedTime } from "../utils/functions";
+import {
+    formattedName,
+    formattedTime,
+    formattedScore,
+} from "../utils/functions";
 import { useNavigate } from "react-router-dom";
+import "../Styles/Scoreboard.css";
 
 function Scoreboard() {
     const [finalScores, setFinalScores] = useState(null);
@@ -69,11 +74,11 @@ function Scoreboard() {
                     </div>{" "}
                     <div>
                         <span>score: </span>
-                        <span>{finalScores.score}</span>
+                        <span>{formattedScore(finalScores.score)}</span>
                     </div>
                 </>
             )}
-            {!submitted && (
+            {finalScores && !submitted && (
                 <form onSubmit={submitScore}>
                     <label>submit your score </label>
                     <input
@@ -84,14 +89,6 @@ function Scoreboard() {
                     <button>submit</button>
                 </form>
             )}
-            <button
-                type="button"
-                onClick={() => {
-                    navigate("/");
-                }}
-            >
-                play again
-            </button>
             {scoreboard && (
                 <table>
                     <thead>
@@ -115,7 +112,7 @@ function Scoreboard() {
                                     }}
                                 >
                                     <td>{score.gamerTag}</td>
-                                    <td>{score.score}</td>
+                                    <td>{formattedScore(score.score)}</td>
                                     <td>{formattedTime(score.totalTime)}</td>
                                     <td>
                                         {formattedTime(score.busyBeachTime)}
@@ -132,6 +129,14 @@ function Scoreboard() {
                     </tbody>
                 </table>
             )}
+            <button
+                type="button"
+                onClick={() => {
+                    navigate("/");
+                }}
+            >
+                play again
+            </button>
         </div>
     );
 }

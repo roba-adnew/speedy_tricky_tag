@@ -1,0 +1,7 @@
+body {
+    display: flex;
+    flex-direction: column;
+    height: 95vh;
+    font-family: "Franklin Gothic Medium", Arial, sans-serif;
+    font-size: 0.8rem;
+}

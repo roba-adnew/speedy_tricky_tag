@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getImageSetMeta as apiGetImageSetMeta } from "../utils/api/gamePlayApi";
 import { useNavigate } from "react-router-dom";
+import "../Styles/Start.css";
 
 function StartAndInstructions() {
     const [imageIds, setImageIds] = useState(null);
